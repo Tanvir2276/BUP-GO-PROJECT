@@ -825,6 +825,82 @@ body.dark-mode .page-header-band {
   box-shadow: 0 4px 12px rgba(0, 72, 43, 0.25);
 }
 
+/* Desktop 2-Column Profile Dashboard Layout */
+.profile-desktop-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.profile-sidebar-rail {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 85px;
+}
+
+.profile-sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color);
+}
+
+.profile-sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.profile-sidebar-btn:hover {
+  background: var(--bup-primary-soft);
+  color: var(--bup-primary);
+}
+
+.profile-sidebar-btn.active {
+  background: var(--bup-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 72, 43, 0.25);
+}
+
+.profile-sidebar-btn.active .dropdown-subtext,
+.profile-sidebar-btn.active div div:last-child {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+
+@media (max-width: 860px) {
+  .profile-desktop-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .profile-sidebar-rail {
+    display: none;
+  }
+}
+
+@media (min-width: 861px) {
+  .profile-tabs-wrapper.mobile-only {
+    display: none !important;
+  }
+}
+
 .settings-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);

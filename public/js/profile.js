@@ -26,24 +26,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 function switchProfileTab(tabName) {
   const personalBtn = document.getElementById('tab-btn-personal');
   const settingsBtn = document.getElementById('tab-btn-settings');
+  const railPersonalBtn = document.getElementById('rail-btn-personal');
+  const railSettingsBtn = document.getElementById('rail-btn-settings');
   const personalSec = document.getElementById('tab-personal-section');
   const settingsSec = document.getElementById('tab-settings-section');
 
   if (tabName === 'settings') {
-    personalBtn.classList.remove('active');
-    settingsBtn.classList.add('active');
-    personalSec.style.display = 'none';
-    settingsSec.style.display = 'block';
+    if (personalBtn) personalBtn.classList.remove('active');
+    if (settingsBtn) settingsBtn.classList.add('active');
+    if (railPersonalBtn) railPersonalBtn.classList.remove('active');
+    if (railSettingsBtn) railSettingsBtn.classList.add('active');
+    if (personalSec) personalSec.style.display = 'none';
+    if (settingsSec) settingsSec.style.display = 'block';
   } else {
-    settingsBtn.classList.remove('active');
-    personalBtn.classList.add('active');
-    settingsSec.style.display = 'none';
-    personalSec.style.display = 'block';
+    if (settingsBtn) settingsBtn.classList.remove('active');
+    if (personalBtn) personalBtn.classList.add('active');
+    if (railSettingsBtn) railSettingsBtn.classList.remove('active');
+    if (railPersonalBtn) railPersonalBtn.classList.add('active');
+    if (settingsSec) settingsSec.style.display = 'none';
+    if (personalSec) personalSec.style.display = 'block';
   }
 
   // Update URL without reloading
   const newUrl = `${window.location.pathname}?tab=${tabName}`;
   window.history.replaceState({}, '', newUrl);
+}
+
+function scrollToPasswordSection() {
+  switchProfileTab('settings');
+  setTimeout(() => {
+    const pwCard = document.getElementById('change-password-form');
+    if (pwCard) pwCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const pwInput = document.getElementById('pw-current');
+    if (pwInput) pwInput.focus();
+  }, 100);
 }
 
 // Load and populate profile data
@@ -69,17 +85,30 @@ async function loadProfile() {
     const editPreview = document.getElementById('edit-avatar-preview');
     if (editPreview) editPreview.src = avatarUrl;
 
+    // Desktop Left Rail Population
+    const railAvatar = document.getElementById('rail-avatar');
+    if (railAvatar) railAvatar.src = avatarUrl;
+    const railName = document.getElementById('rail-name');
+    if (railName) railName.textContent = currentUser.name;
+    const railId = document.getElementById('rail-id');
+    if (railId) railId.textContent = `ID: ${currentUser.studentId}`;
+
     // Role badge
     const roleBadge = document.getElementById('prof-role-badge');
-    if (currentUser.role === 'admin') {
-      roleBadge.textContent = '🛡️ System Admin';
-      roleBadge.className = 'badge badge-purple';
-    } else if (currentUser.role === 'driver') {
-      roleBadge.textContent = '🚗 Verified Driver';
-      roleBadge.className = 'badge badge-green';
-    } else {
-      roleBadge.textContent = '🎓 Verified Student';
-      roleBadge.className = 'badge badge-blue';
+    const railRoleBadge = document.getElementById('rail-role-badge');
+
+    const roleTitle = currentUser.role === 'admin' ? '🛡️ System Admin' :
+                      currentUser.role === 'driver' ? '🚗 Verified Driver' : '🎓 Verified Student';
+    const roleClass = currentUser.role === 'admin' ? 'badge badge-purple' :
+                      currentUser.role === 'driver' ? 'badge badge-green' : 'badge badge-blue';
+
+    if (roleBadge) {
+      roleBadge.textContent = roleTitle;
+      roleBadge.className = roleClass;
+    }
+    if (railRoleBadge) {
+      railRoleBadge.textContent = roleTitle;
+      railRoleBadge.className = roleClass;
     }
 
     // 2. Populate Edit Personal Form
@@ -655,6 +684,8 @@ async function handlePhotoUpload(e) {
       if (profAvatar) profAvatar.src = base64Data;
       const editPreview = document.getElementById('edit-avatar-preview');
       if (editPreview) editPreview.src = base64Data;
+      const railAvatar = document.getElementById('rail-avatar');
+      if (railAvatar) railAvatar.src = base64Data;
 
       try {
         const res = await apiRequest('/auth/profile', {

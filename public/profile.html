@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=2.3">
-  <link rel="stylesheet" href="css/pages.css?v=2.3">
+  <link rel="stylesheet" href="css/style.css?v=2.4">
+  <link rel="stylesheet" href="css/pages.css?v=2.4">
 </head>
 <body>
   <!-- Header Mount -->
@@ -23,9 +23,9 @@
     </div>
   </div>
 
-  <div class="container" style="max-width: 880px; margin-bottom: 70px;">
-    <!-- Profile Tabs Switcher -->
-    <div class="profile-tabs-wrapper">
+  <div class="container" style="max-width: 1140px; margin-bottom: 70px;">
+    <!-- Profile Tabs Switcher (Mobile Only) -->
+    <div class="profile-tabs-wrapper mobile-only">
       <button type="button" class="profile-tab-btn active" id="tab-btn-personal" onclick="switchProfileTab('personal')">
         <span>👤 Personal Information</span>
       </button>
@@ -34,10 +34,60 @@
       </button>
     </div>
 
-    <!-- =========================================================
-         TAB 1: PERSONAL INFORMATION
-         ========================================================= -->
-    <div id="tab-personal-section">
+    <!-- Desktop Grid Layout (Sidebar Rail + Main Content) -->
+    <div class="profile-desktop-layout">
+      <!-- Desktop Left Rail Navigation -->
+      <aside class="profile-sidebar-rail">
+        <div style="text-align: center; margin-bottom: 8px;">
+          <img id="rail-avatar" src="" alt="Avatar" style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bup-primary); margin: 0 auto 10px; display: block; box-shadow: var(--shadow-sm);">
+          <h4 id="rail-name" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">Student Name</h4>
+          <span class="badge badge-green" id="rail-role-badge" style="font-size: 0.72rem;">Verified Student</span>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;" id="rail-id">ID: --</div>
+        </div>
+
+        <div class="profile-sidebar-menu">
+          <button type="button" class="profile-sidebar-btn active" id="rail-btn-personal" onclick="switchProfileTab('personal')">
+            <span style="font-size: 1.15rem;">👤</span>
+            <div>
+              <div style="font-size: 0.88rem; font-weight: 700;">Personal Info</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);" class="dropdown-subtext">View & edit identity</div>
+            </div>
+          </button>
+
+          <button type="button" class="profile-sidebar-btn" id="rail-btn-settings" onclick="switchProfileTab('settings')">
+            <span style="font-size: 1.15rem;">⚙️</span>
+            <div>
+              <div style="font-size: 0.88rem; font-weight: 700;">Role Settings</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);" class="dropdown-subtext">Powers & preferences</div>
+            </div>
+          </button>
+
+          <button type="button" class="profile-sidebar-btn" onclick="scrollToPasswordSection()">
+            <span style="font-size: 1.15rem;">🔒</span>
+            <div>
+              <div style="font-size: 0.88rem; font-weight: 700;">Security</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);" class="dropdown-subtext">Change password</div>
+            </div>
+          </button>
+
+          <div style="height: 1px; background: var(--border-color); margin: 6px 0;"></div>
+
+          <button type="button" class="profile-sidebar-btn" onclick="handleSignOut()" style="color: var(--bup-red);">
+            <span style="font-size: 1.15rem;">🚪</span>
+            <div>
+              <div style="font-size: 0.88rem; font-weight: 700; color: var(--bup-red);">Sign Out</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);" class="dropdown-subtext">End session</div>
+            </div>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right Main Content Area -->
+      <main class="profile-main-content">
+        <!-- =========================================================
+             TAB 1: PERSONAL INFORMATION
+             ========================================================= -->
+        <div id="tab-personal-section">
       <!-- Overview Card -->
       <div class="profile-card">
         <div class="profile-header-grid">
@@ -243,6 +293,8 @@
           </div>
         </form>
       </div>
+    </div>
+      </main>
     </div>
   </div>
 

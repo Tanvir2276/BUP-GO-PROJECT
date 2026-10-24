@@ -331,13 +331,13 @@ input, select, textarea {
   display: none;
   position: absolute;
   right: 0;
-  top: 48px;
-  width: 295px;
+  top: 50px;
+  width: 310px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-hover);
-  z-index: 2100;
+  box-shadow: 0 12px 32px rgba(0, 30, 18, 0.14), 0 2px 8px rgba(0, 30, 18, 0.06);
+  z-index: 2200;
   overflow: hidden;
   animation: fadeInDown 0.18s ease-out;
 }
@@ -353,6 +353,7 @@ input, select, textarea {
   }
 }
 
+.user-dropdown-header,
 .user-menu-header {
   padding: 14px 16px;
   display: flex;
@@ -1275,6 +1276,7 @@ body.dark-mode .user-menu-dropdown {
   border-color: #1e3148;
 }
 
+body.dark-mode .user-dropdown-header,
 body.dark-mode .user-menu-header {
   background: #162436;
   border-bottom-color: #1e3148;
