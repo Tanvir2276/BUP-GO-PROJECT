@@ -273,17 +273,46 @@ body.dark-mode .page-header-band {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 22px;
-  height: fit-content;
+  padding: 16px 18px;
+  position: sticky;
+  top: 85px;
+  max-height: calc(100vh - 105px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
 }
 
-@media (min-width: 861px) {
-  .filter-sidebar {
-    position: sticky;
-    top: 85px;
-    max-height: calc(100vh - 105px);
-    overflow-y: auto;
-  }
+.filter-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.filter-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.filter-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--bup-primary);
+}
+
+.filter-sidebar .form-group {
+  margin-bottom: 11px;
+}
+
+.filter-sidebar .form-label {
+  font-size: 0.82rem;
+  margin-bottom: 3px;
+  font-weight: 700;
+}
+
+.filter-sidebar .form-control {
+  padding: 7px 11px;
+  font-size: 0.88rem;
 }
 
 .filter-sidebar h3 {

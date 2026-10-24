@@ -12,7 +12,7 @@
     "session": "N/A",
     "role": "admin",
     "password": "$2b$10$JphPYHH1WaD2SMyyDn/NX.kvry.R0OlFPlmcDnr6ANMFoIH.2BHjO",
-    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300&q=80",
     "bio": "System Administrator for BUPGO Platform."
   },
   {
@@ -28,7 +28,7 @@
     "session": "2021-22",
     "role": "passenger",
     "password": "$2b$10$D2oSAd8yeBi.T4nyZr8MzeNi6iCE91QjUXJAXONIw79.Goa48XeJS",
-    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
+    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80",
     "bio": "FST CSE student looking for carpool buddy from Dhanmondi."
   },
   {
@@ -44,7 +44,7 @@
     "session": "2020-21",
     "role": "passenger",
     "password": "$2b$10$D2oSAd8yeBi.T4nyZr8MzeNi6iCE91QjUXJAXONIw79.Goa48XeJS",
-    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
     "bio": "FBS student. Always on time for 8:30 AM class."
   },
   {
@@ -62,7 +62,7 @@
     "password": "$2b$10$D2oSAd8yeBi.T4nyZr8MzeNi6iCE91QjUXJAXONIw79.Goa48XeJS",
     "vehicleType": "Motorbike",
     "vehicleModel": "Yamaha FZS V3 (Dhaka Metro Ha 19-8765)",
-    "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80",
+    "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=300&q=80",
     "bio": "ICT 2nd year. Safe rider with extra helmet. Route via Uttara and ECB."
   },
   {
@@ -80,7 +80,67 @@
     "password": "$2b$10$D2oSAd8yeBi.T4nyZr8MzeNi6iCE91QjUXJAXONIw79.Goa48XeJS",
     "vehicleType": "Car",
     "vehicleModel": "Toyota Axio (Dhaka Metro Ga 21-4321)",
-    "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80",
+    "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
     "bio": "BICE student. Commuting daily from Mirpur 10. Calm driving, AC on."
+  },
+  {
+    "_id": "6adccc7f7839a3f3caa059dc",
+    "createdAt": "2026-10-24T15:19:27.838Z",
+    "updatedAt": "2026-10-24T15:19:27.841Z",
+    "name": "jabenNakimama",
+    "studentId": "2254901091",
+    "email": "jabennakimama@bup.edu.bd",
+    "phone": "01711998877",
+    "department": "ICT (ICE)",
+    "batch": "BICE-2024",
+    "session": "2021-22",
+    "role": "driver",
+    "password": "$2b$10$D2oSAd8yeBi.T4nyZr8MzeNi6iCE91QjUXJAXONIw79.Goa48XeJS",
+    "vehicleType": "Car",
+    "vehicleModel": "Toyota Premio (Dhaka Metro Ga 28-9012)",
+    "avatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80",
+    "rating": 4.95,
+    "totalReviews": 42,
+    "bio": "Mama jaben naki? Daily carpool route between ECB / Mirpur and BUP. Super punctual and safe AC ride."
+  },
+  {
+    "_id": "6adccc7f7839a3f3caa059dd",
+    "createdAt": "2026-10-24T15:19:27.841Z",
+    "updatedAt": "2026-10-24T15:19:27.841Z",
+    "name": "choloBUP",
+    "studentId": "2254901092",
+    "email": "cholobup@bup.edu.bd",
+    "phone": "01822001122",
+    "department": "Computer Science & Engineering",
+    "batch": "BCSE-2023",
+    "session": "2021-22",
+    "role": "driver",
+    "password": "$2b$10$D2oSAd8yeBi.T4nyZr8MzeNi6iCE91QjUXJAXONIw79.Goa48XeJS",
+    "vehicleType": "Car",
+    "vehicleModel": "Honda Grace Hybrid (Dhaka Metro Ga 33-1144)",
+    "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80",
+    "rating": 4.98,
+    "totalReviews": 55,
+    "bio": "Cholo BUP! Commuting from Uttara / Airport / ECB every morning. Clean car, nice acoustic playlist, calm driving."
+  },
+  {
+    "_id": "6adccc7f7839a3f3caa059de",
+    "createdAt": "2026-10-24T15:19:27.841Z",
+    "updatedAt": "2026-10-24T15:19:27.841Z",
+    "name": "AmiBasayJabo",
+    "studentId": "2254901093",
+    "email": "amibasayjabo@bup.edu.bd",
+    "phone": "01933112244",
+    "department": "BBA Marketing",
+    "batch": "BBA-2024",
+    "session": "2022-23",
+    "role": "driver",
+    "password": "$2b$10$D2oSAd8yeBi.T4nyZr8MzeNi6iCE91QjUXJAXONIw79.Goa48XeJS",
+    "vehicleType": "Car",
+    "vehicleModel": "Suzuki Swift Dzire (Dhaka Metro Kha 14-5566)",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
+    "rating": 4.92,
+    "totalReviews": 36,
+    "bio": "Class shesh, Ami Basay Jabo! Returning from BUP to Dhanmondi, Mirpur, and Farmgate daily."
   }
 ]

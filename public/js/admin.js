@@ -7,6 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadAdminData() {
+  const currentUser = Auth.getUser();
+  if (!currentUser || currentUser.role !== 'admin') {
+    showToast('Access Denied: Only Administrator accounts can view this page.', 'error');
+    setTimeout(() => {
+      window.location.replace('index.html');
+    }, 600);
+    return;
+  }
+
   try {
     const data = await apiRequest('/admin/stats');
     if (!data.success) return;

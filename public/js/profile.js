@@ -66,6 +66,8 @@ async function loadProfile() {
 
     const avatarUrl = currentUser.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.name)}`;
     document.getElementById('prof-avatar').src = avatarUrl;
+    const editPreview = document.getElementById('edit-avatar-preview');
+    if (editPreview) editPreview.src = avatarUrl;
 
     // Role badge
     const roleBadge = document.getElementById('prof-role-badge');
@@ -605,6 +607,71 @@ function initFormListeners() {
       }
     });
   }
+}
+
+// Photo Upload Handler (Supports Phone Gallery/Camera & PC)
+async function handlePhotoUpload(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast('Please select a valid image file (JPG, PNG, WEBP).', 'error');
+    return;
+  }
+
+  showToast('Processing photo...', 'info');
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    const img = new Image();
+    img.onload = async function() {
+      // Scale down image to max 320x320 with JPEG compression for lightning fast loading
+      const canvas = document.createElement('canvas');
+      const MAX_SIZE = 320;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > MAX_SIZE) {
+          height = Math.round(height * (MAX_SIZE / width));
+          width = MAX_SIZE;
+        }
+      } else {
+        if (height > MAX_SIZE) {
+          width = Math.round(width * (MAX_SIZE / height));
+          height = MAX_SIZE;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const base64Data = canvas.toDataURL('image/jpeg', 0.85);
+
+      // Instant preview
+      const profAvatar = document.getElementById('prof-avatar');
+      if (profAvatar) profAvatar.src = base64Data;
+      const editPreview = document.getElementById('edit-avatar-preview');
+      if (editPreview) editPreview.src = base64Data;
+
+      try {
+        const res = await apiRequest('/auth/profile', {
+          method: 'PUT',
+          body: JSON.stringify({ avatar: base64Data })
+        });
+        Auth.setSession(Auth.getToken(), res.user);
+        currentUser = res.user;
+        showToast('Profile photo uploaded and saved successfully!', 'success');
+        if (typeof renderNavbar === 'function') renderNavbar();
+      } catch (err) {
+        showToast(err.message || 'Failed to save photo', 'error');
+      }
+    };
+    img.src = evt.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 // Avatar changer helper
