@@ -702,7 +702,24 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Server and initialize NoSQL database
+// Middleware to ensure Database is initialized on Serverless platforms (e.g. Vercel)
+let dbReadyPromise = null;
+app.use(async (req, res, next) => {
+  if (!dbReadyPromise) {
+    dbReadyPromise = (async () => {
+      try {
+        await initDatabase();
+        await seedData();
+      } catch (err) {
+        console.error('Serverless DB init error:', err);
+      }
+    })();
+  }
+  await dbReadyPromise;
+  next();
+});
+
+// Start Server locally
 async function startServer() {
   await initDatabase();
   await seedData();
@@ -742,4 +759,9 @@ async function startServer() {
   });
 }
 
-startServer();
+// Run server only when executed directly or non-serverless
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+module.exports = app;

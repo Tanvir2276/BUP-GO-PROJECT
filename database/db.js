@@ -9,8 +9,23 @@ const path = require('path');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
-const DATA_DIR = path.join(__dirname, 'nosql_data');
-if (!fs.existsSync(DATA_DIR)) {
+let DATA_DIR = path.join(__dirname, 'nosql_data');
+// Support serverless platforms like Vercel where root filesystem is read-only
+if (process.env.VERCEL) {
+  const tmpDir = path.join('/tmp', 'bupgo_data');
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, { recursive: true });
+    const originalDir = path.join(__dirname, 'nosql_data');
+    if (fs.existsSync(originalDir)) {
+      for (const file of fs.readdirSync(originalDir)) {
+        try {
+          fs.copyFileSync(path.join(originalDir, file), path.join(tmpDir, file));
+        } catch (e) {}
+      }
+    }
+  }
+  DATA_DIR = tmpDir;
+} else if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
