@@ -84,6 +84,7 @@ const RideSchema = new mongoose.Schema({
   transportType: { type: String },
   vehicleModel: { type: String, default: '' },
   estimatedCost: { type: Number, default: 0 },
+  fareSnapshot: { type: mongoose.Schema.Types.Mixed, default: null },
   status: { type: String, default: 'active', index: true },
   additionalInfo: { type: String, default: '' },
   notes: { type: String }
@@ -112,10 +113,23 @@ const NotificationSchema = new mongoose.Schema({
   read: { type: Boolean, default: false }
 }, { timestamps: true, strict: false });
 
+const FareConfigSchema = new mongoose.Schema({
+  vehicleType: { type: String, required: true, index: true }, // 'Bike', 'Car', 'CNG'
+  vehicleDisplayName: { type: String, default: '' },
+  city: { type: String, default: 'nationwide', index: true },
+  baseFare: { type: Number, required: true, default: 0 },
+  perKmRate: { type: Number, required: true, default: 0 },
+  waitingChargePerMin: { type: Number, required: true, default: 0 },
+  freeWaitingMinutes: { type: Number, default: 3 },
+  isActive: { type: Boolean, default: true },
+  updatedBy: { type: String, default: 'admin' }
+}, { timestamps: true, strict: false });
+
 const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
 const RideModel = mongoose.models.Ride || mongoose.model('Ride', RideSchema);
 const RequestModel = mongoose.models.Request || mongoose.model('Request', RequestSchema);
 const NotificationModel = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
+const FareConfigModel = mongoose.models.FareConfig || mongoose.model('FareConfig', FareConfigSchema);
 
 // Normalize document to ensure consistent string _id and field compatibility
 function normalizeDoc(doc) {
@@ -467,12 +481,14 @@ const rawUsersJson = new NoSQLCollection('users');
 const rawRidesJson = new NoSQLCollection('rides');
 const rawRequestsJson = new NoSQLCollection('requests');
 const rawNotificationsJson = new NoSQLCollection('notifications');
+const rawFareConfigsJson = new NoSQLCollection('fare_configs');
 
 // Dual-mode exported collections
 const Users = new DualCollection('users', UserModel, rawUsersJson);
 const Rides = new DualCollection('rides', RideModel, rawRidesJson);
 const Requests = new DualCollection('requests', RequestModel, rawRequestsJson);
 const Notifications = new DualCollection('notifications', NotificationModel, rawNotificationsJson);
+const FareConfigs = new DualCollection('fare_configs', FareConfigModel, rawFareConfigsJson);
 
 /* =========================================================
    4. DATA SYNC (JSON Files -> MongoDB Database)
@@ -542,6 +558,21 @@ async function syncDataToMongoDB() {
         });
       }
     }
+
+    // 5. Sync Fare Configurations
+    const jsonFares = rawFareConfigsJson._read();
+    for (const fc of jsonFares) {
+      const exists = await FareConfigModel.findOne({
+        vehicleType: fc.vehicleType,
+        city: fc.city || 'nationwide'
+      });
+      if (!exists) {
+        await FareConfigModel.create({
+          ...fc,
+          _id: mongoose.Types.ObjectId.isValid(fc._id) ? new mongoose.Types.ObjectId(fc._id) : undefined
+        });
+      }
+    }
   } catch (err) {
     console.warn('⚠️ MongoDB data sync notice:', err.message);
   }
@@ -598,8 +629,10 @@ module.exports = {
   Rides,
   Requests,
   Notifications,
+  FareConfigs,
   UserModel,
   RideModel,
   RequestModel,
-  NotificationModel
+  NotificationModel,
+  FareConfigModel
 };

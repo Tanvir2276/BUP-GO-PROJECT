@@ -4,6 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   loadAdminData();
+  loadFareRates();
 });
 
 async function loadAdminData() {
@@ -151,5 +152,201 @@ function broadcastNotice() {
   const msg = prompt('Enter University-wide Carpool Announcement (e.g. Special exam week schedules):', 'Exam Week Notice: Additional carpools active from Mirpur 10, Uttara & Dhanmondi for 8:30 AM slots.');
   if (msg) {
     showToast('📢 Announcement published to all BUP students: ' + msg, 'success');
+  }
+}
+
+/* =========================================================
+   DYNAMIC FARE RATES CONTROLLER & ADMIN MANAGEMENT
+   ========================================================= */
+
+let currentFareConfigs = [];
+
+async function loadFareRates(selectedCity = 'nationwide') {
+  try {
+    const res = await apiRequest(`/fares/configs?city=${encodeURIComponent(selectedCity)}`);
+    if (!res.success) return;
+
+    currentFareConfigs = res.configs || [];
+
+    // Map each vehicle type to input fields
+    for (const c of currentFareConfigs) {
+      const type = (c.vehicleType || '').toLowerCase();
+      const prefix = type.includes('bike') ? 'bike' : type.includes('cng') ? 'cng' : 'car';
+
+      const idEl = document.getElementById(`fare-id-${prefix}`);
+      const baseEl = document.getElementById(`fare-base-${prefix}`);
+      const kmEl = document.getElementById(`fare-km-${prefix}`);
+      const waitEl = document.getElementById(`fare-wait-${prefix}`);
+      const freeEl = document.getElementById(`fare-freewait-${prefix}`);
+
+      if (idEl) idEl.value = c._id || '';
+      if (baseEl) baseEl.value = c.baseFare;
+      if (kmEl) kmEl.value = c.perKmRate;
+      if (waitEl) waitEl.value = c.waitingChargePerMin;
+      if (freeEl) freeEl.value = c.freeWaitingMinutes !== undefined ? c.freeWaitingMinutes : 3;
+    }
+
+    updateFareExamples();
+  } catch (err) {
+    console.warn('Fare rates load notice:', err.message);
+  }
+}
+
+function updateFareExamples() {
+  const types = ['bike', 'car', 'cng'];
+  const testDist = 5.0; // 5 km example
+  const testWait = 5.0; // 5 minutes waiting
+
+  for (const t of types) {
+    const base = Number(document.getElementById(`fare-base-${t}`)?.value) || 0;
+    const km = Number(document.getElementById(`fare-km-${t}`)?.value) || 0;
+    const wait = Number(document.getElementById(`fare-wait-${t}`)?.value) || 0;
+    const freeWait = Number(document.getElementById(`fare-freewait-${t}`)?.value) || 3;
+
+    const chargeableWait = Math.max(0, testWait - freeWait);
+    const total = Math.round(base + (testDist * km) + (chargeableWait * wait));
+
+    const exEl = document.getElementById(`example-${t}`);
+    if (exEl) {
+      exEl.innerHTML = `<strong>৳ ${total}</strong> <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: normal; display: block;">(Base ৳${base} + 5km×৳${km} + 2m wait)</span>`;
+    }
+  }
+}
+
+async function handleSaveFareRates(e) {
+  if (e) e.preventDefault();
+
+  const city = document.getElementById('fare-region-selector')?.value || 'nationwide';
+  const saveBtn = document.getElementById('btn-save-fares');
+
+  const ratesToSave = [
+    {
+      vehicleType: 'Bike',
+      vehicleDisplayName: 'Motorbike',
+      city: city,
+      baseFare: Number(document.getElementById('fare-base-bike').value),
+      perKmRate: Number(document.getElementById('fare-km-bike').value),
+      waitingChargePerMin: Number(document.getElementById('fare-wait-bike').value),
+      freeWaitingMinutes: Number(document.getElementById('fare-freewait-bike').value)
+    },
+    {
+      vehicleType: 'Car',
+      vehicleDisplayName: 'Personal Car',
+      city: city,
+      baseFare: Number(document.getElementById('fare-base-car').value),
+      perKmRate: Number(document.getElementById('fare-km-car').value),
+      waitingChargePerMin: Number(document.getElementById('fare-wait-car').value),
+      freeWaitingMinutes: Number(document.getElementById('fare-freewait-car').value)
+    },
+    {
+      vehicleType: 'CNG',
+      vehicleDisplayName: 'CNG / Auto Rickshaw',
+      city: city,
+      baseFare: Number(document.getElementById('fare-base-cng').value),
+      perKmRate: Number(document.getElementById('fare-km-cng').value),
+      waitingChargePerMin: Number(document.getElementById('fare-wait-cng').value),
+      freeWaitingMinutes: Number(document.getElementById('fare-freewait-cng').value)
+    }
+  ];
+
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving to MongoDB...';
+  }
+
+  try {
+    const res = await apiRequest('/fares/configs', {
+      method: 'PUT',
+      body: JSON.stringify({ rates: ratesToSave })
+    });
+
+    showToast(res.message || 'Dynamic fare rates updated and saved to MongoDB!', 'success');
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '💾 Save & Apply Fare Rates';
+    }
+    await loadFareRates(city);
+  } catch (err) {
+    showToast(err.message || 'Failed to save fare rates', 'error');
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '💾 Save & Apply Fare Rates';
+    }
+  }
+}
+
+function resetDefaultFareRates() {
+  if (!confirm('Reset all fare rates to official BUPGO specification defaults (Bike ৳20/৳12, Car ৳50/৳20, CNG ৳40/৳14)?')) return;
+
+  // Defaults:
+  // Bike: Base 20, 12/km, 0.50/min, 3 min free
+  document.getElementById('fare-base-bike').value = 20;
+  document.getElementById('fare-km-bike').value = 12;
+  document.getElementById('fare-wait-bike').value = 0.5;
+  document.getElementById('fare-freewait-bike').value = 3;
+
+  // Car: Base 50, 20/km, 1.50/min, 3 min free
+  document.getElementById('fare-base-car').value = 50;
+  document.getElementById('fare-km-car').value = 20;
+  document.getElementById('fare-wait-car').value = 1.5;
+  document.getElementById('fare-freewait-car').value = 3;
+
+  // CNG: Base 40, 14/km, 1.00/min, 3 min free
+  document.getElementById('fare-base-cng').value = 40;
+  document.getElementById('fare-km-cng').value = 14;
+  document.getElementById('fare-wait-cng').value = 1.0;
+  document.getElementById('fare-freewait-cng').value = 3;
+
+  updateFareExamples();
+  showToast('Reset to defaults in form. Click "Save & Apply Fare Rates" to persist in MongoDB.', 'info');
+}
+
+async function runAdminFareTest() {
+  const pickup = document.getElementById('test-pickup')?.value || 'Mirpur 10';
+  const dest = document.getElementById('test-dest')?.value || 'BUP Campus';
+  const vehicle = document.getElementById('test-vehicle')?.value || 'Car';
+  const wait = Number(document.getElementById('test-wait')?.value || 0);
+  const city = document.getElementById('fare-region-selector')?.value || 'nationwide';
+
+  const resultBox = document.getElementById('test-fare-result');
+  if (!resultBox) return;
+
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = '<span style="color: var(--text-muted);">Calculating authoritative fare via backend Directions engine...</span>';
+
+  try {
+    const res = await apiRequest('/fares/calculate', {
+      method: 'POST',
+      body: JSON.stringify({
+        startingLocation: pickup,
+        destination: dest,
+        vehicleType: vehicle,
+        waitingMinutes: wait,
+        city: city
+      })
+    });
+
+    const f = res.fare;
+    resultBox.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 8px;">
+        <span style="font-weight: 700; color: var(--bup-primary); font-size: 0.95rem;">
+          ${f.vehicleDisplayName} • ${pickup} ➔ ${dest}
+        </span>
+        <span style="font-size: 1.25rem; font-weight: 800; color: var(--bup-primary-dark);">
+          ৳ ${f.totalFare}
+        </span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; font-size: 0.8rem; margin-bottom: 6px;">
+        <div>📍 Distance: <strong>${f.distanceKm} km</strong></div>
+        <div>⏱️ Waiting: <strong>${f.waitingMinutes} min (${f.chargeableWaitingMinutes} min chargeable)</strong></div>
+        <div>🛡️ Free Waiting: <strong>${f.freeWaitingMinutes} mins</strong></div>
+        <div>🏷️ Base Fare: <strong>৳ ${f.rates.baseFare}</strong></div>
+      </div>
+      <div style="font-size: 0.78rem; color: var(--bup-primary); background: var(--bup-primary-soft); padding: 6px 10px; border-radius: 4px; font-family: monospace;">
+        📐 Formula: ${f.breakdown.formula} = <strong>৳${f.totalFare}</strong>
+      </div>
+    `;
+  } catch (err) {
+    resultBox.innerHTML = `<span style="color: var(--bup-red);">Error calculating test fare: ${err.message}</span>`;
   }
 }

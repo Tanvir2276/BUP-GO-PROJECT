@@ -216,3 +216,51 @@ function renderRideCard(ride) {
     </div>
   `;
 }
+
+/* =========================================================
+   HOME PAGE QUICK FARE ESTIMATOR
+   ========================================================= */
+
+let homeFareTimer = null;
+function debounceHomeFareCalc() {
+  clearTimeout(homeFareTimer);
+  homeFareTimer = setTimeout(calculateHomeFare, 400);
+}
+
+async function calculateHomeFare() {
+  const start = document.getElementById('home-fare-start')?.value.trim();
+  const dest = document.getElementById('home-fare-dest')?.value.trim();
+  const vehicle = document.getElementById('home-fare-vehicle')?.value || 'Car';
+
+  if (!start || !dest) return;
+
+  try {
+    const res = await apiRequest('/fares/calculate', {
+      method: 'POST',
+      body: JSON.stringify({
+        startingLocation: start,
+        destination: dest,
+        vehicleType: vehicle,
+        city: 'nationwide'
+      })
+    });
+
+    if (res.success && res.fare) {
+      const f = res.fare;
+      const fareEl = document.getElementById('home-fare-val');
+      const distEl = document.getElementById('home-dist-val');
+      const formulaEl = document.getElementById('home-formula-val');
+
+      if (fareEl) fareEl.textContent = `৳ ${f.totalFare}`;
+      if (distEl) distEl.textContent = `(Distance: ~${f.distanceKm} km)`;
+      if (formulaEl) formulaEl.textContent = `${f.breakdown.formula} • 🛡️ 3 mins free waiting included`;
+    }
+  } catch (err) {
+    console.warn('Home fare calculation error:', err.message);
+  }
+}
+
+// Run initial estimate on home page load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(calculateHomeFare, 300);
+});

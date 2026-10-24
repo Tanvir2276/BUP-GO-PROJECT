@@ -97,6 +97,215 @@
       </div>
     </div>
 
+    <!-- =========================================================
+         DYNAMIC RIDE FARE CALCULATION & RATES CONFIGURATION
+         ========================================================= -->
+    <div class="admin-table-container" style="margin-bottom: 35px; border-top: 4px solid var(--bup-primary);">
+      <div class="admin-table-header" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="display: flex; align-items: center; gap: 8px; font-size: 1.25rem;">
+              <span>💰 Dynamic Fare Calculation & Nationwide Rates</span>
+              <span class="badge badge-green" style="font-size: 0.72rem;">Central MongoDB Store</span>
+            </h3>
+            <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 4px;">
+              Formula: <strong>Total Fare = Base Fare + (Distance × Per-KM Rate) + (Chargeable Waiting Minutes × Waiting Rate)</strong>
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted);">Region / Pricing Tier:</label>
+            <select id="fare-region-selector" class="form-control" style="width: auto; padding: 5px 10px; font-size: 0.82rem;" onchange="loadFareRates(this.value)">
+              <option value="nationwide" selected>🇧🇩 Nationwide Default</option>
+              <option value="Dhaka">🏙️ Dhaka Metropolitan (BUP)</option>
+              <option value="Chittagong">⚓ Chittagong Division</option>
+              <option value="Rajshahi">🌾 Rajshahi Division</option>
+              <option value="Sylhet">🍵 Sylhet Division</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 16px 20px;">
+        <form id="fare-rates-form" onsubmit="handleSaveFareRates(event)">
+          <div style="overflow-x: auto;">
+            <table class="data-table" style="min-width: 680px;">
+              <thead>
+                <tr>
+                  <th>Vehicle Type</th>
+                  <th>Base Fare (৳)</th>
+                  <th>Per-KM Rate (৳/km)</th>
+                  <th>Waiting Charge (৳/min)</th>
+                  <th>Free Waiting (Mins)</th>
+                  <th>Live 5km Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Bike Row -->
+                <tr>
+                  <td>
+                    <strong>🏍️ Bike</strong>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Motorbike / Scooter</div>
+                    <input type="hidden" id="fare-id-bike">
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-base-bike" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="1" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-km-bike" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="0.5" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-wait-bike" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="0.1" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <input type="number" id="fare-freewait-bike" class="form-control" style="width: 75px; padding: 6px 8px;" min="0" step="1" required oninput="updateFareExamples()">
+                      <span style="font-size: 0.8rem; color: var(--text-muted);">min</span>
+                    </div>
+                  </td>
+                  <td id="example-bike" style="font-weight: 700; color: var(--bup-primary); font-size: 0.95rem;">
+                    ৳ 80
+                  </td>
+                </tr>
+
+                <!-- Car Row -->
+                <tr>
+                  <td>
+                    <strong>🚗 Personal Car</strong>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Sedan / Hatchback / Micro</div>
+                    <input type="hidden" id="fare-id-car">
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-base-car" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="1" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-km-car" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="0.5" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-wait-car" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="0.1" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <input type="number" id="fare-freewait-car" class="form-control" style="width: 75px; padding: 6px 8px;" min="0" step="1" required oninput="updateFareExamples()">
+                      <span style="font-size: 0.8rem; color: var(--text-muted);">min</span>
+                    </div>
+                  </td>
+                  <td id="example-car" style="font-weight: 700; color: var(--bup-primary); font-size: 0.95rem;">
+                    ৳ 150
+                  </td>
+                </tr>
+
+                <!-- CNG Row -->
+                <tr>
+                  <td>
+                    <strong>🛺 CNG / Auto</strong>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Auto Rickshaw</div>
+                    <input type="hidden" id="fare-id-cng">
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-base-cng" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="1" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-km-cng" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="0.5" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <span>৳</span>
+                      <input type="number" id="fare-wait-cng" class="form-control" style="width: 85px; padding: 6px 8px;" min="0" step="0.1" required oninput="updateFareExamples()">
+                    </div>
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <input type="number" id="fare-freewait-cng" class="form-control" style="width: 75px; padding: 6px 8px;" min="0" step="1" required oninput="updateFareExamples()">
+                      <span style="font-size: 0.8rem; color: var(--text-muted);">min</span>
+                    </div>
+                  </td>
+                  <td id="example-cng" style="font-weight: 700; color: var(--bup-primary); font-size: 0.95rem;">
+                    ৳ 110
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 0.82rem; color: var(--text-muted);">
+              ℹ️ Rates are stored centrally in MongoDB and automatically validated on backend during ride creation & booking.
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="resetDefaultFareRates()">
+                ↺ Reset to Specification Defaults
+              </button>
+              <button type="submit" id="btn-save-fares" class="btn btn-primary btn-sm" style="font-weight: 700; padding: 8px 18px;">
+                💾 Save & Apply Fare Rates
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Live Fare Calculation Verification Sandbox -->
+        <div style="margin-top: 22px; background: var(--bg-main); padding: 14px 18px; border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+            <strong style="font-size: 0.88rem; color: var(--bup-primary);">🧪 Authoritative Fare Tester & Directions API Validator:</strong>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Test formula live with current rates</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) 100px; gap: 10px; align-items: end;">
+            <div>
+              <label style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 2px;">Pickup Point</label>
+              <input type="text" id="test-pickup" class="form-control" value="Mirpur 10 Circle" style="padding: 6px 8px; font-size: 0.84rem;">
+            </div>
+            <div>
+              <label style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 2px;">Destination</label>
+              <input type="text" id="test-dest" class="form-control" value="BUP Campus (Main Gate)" style="padding: 6px 8px; font-size: 0.84rem;">
+            </div>
+            <div>
+              <label style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 2px;">Vehicle Type</label>
+              <select id="test-vehicle" class="form-control" style="padding: 6px 8px; font-size: 0.84rem;">
+                <option value="Car">🚗 Personal Car</option>
+                <option value="Bike">🏍️ Bike</option>
+                <option value="CNG">🛺 CNG / Auto</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.76rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 2px;">Waiting (Mins)</label>
+              <input type="number" id="test-wait" class="form-control" value="5" min="0" style="padding: 6px 8px; font-size: 0.84rem;">
+            </div>
+            <div>
+              <button type="button" class="btn btn-primary btn-sm" onclick="runAdminFareTest()" style="width: 100%; padding: 7px 10px; font-size: 0.82rem; font-weight: 700;">
+                Test Fare
+              </button>
+            </div>
+          </div>
+          <div id="test-fare-result" style="margin-top: 10px; font-size: 0.84rem; display: none; background: #ffffff; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <!-- Test result output -->
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Registered Students Table -->
     <div class="admin-table-container">
       <div class="admin-table-header">

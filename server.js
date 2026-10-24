@@ -5,8 +5,15 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const { initDatabase, getDbStatus, Users, Rides, Requests, Notifications } = require('./database/db');
+const { initDatabase, getDbStatus, Users, Rides, Requests, Notifications, FareConfigs } = require('./database/db');
 const { seedData } = require('./database/seed');
+const {
+  normalizeVehicleType,
+  estimateRouteDistanceKm,
+  getFareConfig,
+  calculateAuthoritativeFare,
+  DEFAULT_RATES
+} = require('./services/fareService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -373,6 +380,18 @@ app.post('/api/rides', authenticateToken, async (req, res) => {
     const isReturn = startingLocation.toLowerCase().includes('bup');
     const tripType = req.body.tripType || (isReturn ? 'return' : 'to_campus');
 
+    // Authoritative Fare Calculation & Dynamic Snapshot
+    const fareSnapshot = await calculateAuthoritativeFare({
+      vehicleType: transportationType || 'Car',
+      startingLocation: startingLocation.trim(),
+      destination: destination.trim(),
+      city: 'nationwide'
+    });
+
+    const costPerSeat = estimatedCost && Number(estimatedCost) > 0
+      ? Number(estimatedCost)
+      : fareSnapshot.totalFare;
+
     const seats = parseInt(availableSeats, 10);
     const newRide = await Rides.create({
       driverId: driver._id,
@@ -392,7 +411,8 @@ app.post('/api/rides', authenticateToken, async (req, res) => {
       availableSeats: seats,
       transportationType: transportationType || 'Car',
       vehicleModel: vehicleModel ? vehicleModel.trim() : (driver.vehicleModel || 'Standard'),
-      estimatedCost: Number(estimatedCost) || 0,
+      estimatedCost: costPerSeat,
+      fareSnapshot: fareSnapshot,
       status: 'active',
       additionalInfo: additionalInfo ? additionalInfo.trim() : 'Commuting to/from BUP Campus.'
     });
@@ -504,6 +524,9 @@ app.post('/api/requests', authenticateToken, async (req, res) => {
 
     const rider = await Users.findById(req.user.id);
 
+    const costPerSeat = ride.estimatedCost || (ride.fareSnapshot && ride.fareSnapshot.totalFare) || 40;
+    const totalEstimatedPrice = costPerSeat * requestedSeats;
+
     const newRequest = await Requests.create({
       rideId: ride._id,
       riderId: rider._id,
@@ -514,6 +537,8 @@ app.post('/api/requests', authenticateToken, async (req, res) => {
       seatsRequested: requestedSeats,
       pickupLocation: pickupLocation || ride.startingLocation,
       notes: notes || '',
+      fareSnapshot: ride.fareSnapshot || null,
+      totalEstimatedPrice: totalEstimatedPrice,
       status: 'pending'
     });
 
@@ -616,6 +641,166 @@ app.put('/api/requests/:id/status', authenticateToken, async (req, res) => {
     });
   } catch (err) {
     console.error('Error updating request status:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+/* =========================================================
+   DYNAMIC RIDE FARE CALCULATION & ADMIN CONFIGURATION API
+   ========================================================= */
+
+// 1. Get all active fare configurations
+app.get('/api/fares/configs', async (req, res) => {
+  try {
+    const city = req.query.city || 'nationwide';
+    let configs = await FareConfigs.find({ isActive: true });
+
+    // Ensure all 3 default vehicle types (Bike, Car, CNG) are present
+    const types = ['Bike', 'Car', 'CNG'];
+    for (const t of types) {
+      if (!configs.some(c => c.vehicleType === t)) {
+        const def = DEFAULT_RATES[t];
+        const created = await FareConfigs.create({
+          vehicleType: def.vehicleType,
+          vehicleDisplayName: def.vehicleDisplayName,
+          city: def.city,
+          baseFare: def.baseFare,
+          perKmRate: def.perKmRate,
+          waitingChargePerMin: def.waitingChargePerMin,
+          freeWaitingMinutes: def.freeWaitingMinutes,
+          isActive: true
+        });
+        configs.push(created);
+      }
+    }
+
+    res.json({
+      success: true,
+      city,
+      configs,
+      currency: '৳',
+      formula: 'Total Fare = Base Fare + (Distance × Per-KM Rate) + (Chargeable Waiting Minutes × Waiting Rate)',
+      rule: 'Chargeable Waiting Minutes = Math.max(0, Waiting Minutes - Free Waiting Minutes)'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 2. Authoritative Real-Time Fare Calculation Endpoint
+app.post('/api/fares/calculate', async (req, res) => {
+  try {
+    const {
+      vehicleType,
+      startingLocation,
+      destination,
+      distanceKm,
+      waitingMinutes,
+      city
+    } = req.body;
+
+    const snapshot = await calculateAuthoritativeFare({
+      vehicleType: vehicleType || 'Car',
+      startingLocation: startingLocation || 'Mirpur 10',
+      destination: destination || 'BUP Campus',
+      distanceKm: distanceKm !== undefined && distanceKm !== '' ? Number(distanceKm) : undefined,
+      waitingMinutes: waitingMinutes !== undefined && waitingMinutes !== '' ? Number(waitingMinutes) : 0,
+      city: city || 'nationwide'
+    });
+
+    res.json({
+      success: true,
+      fare: snapshot
+    });
+  } catch (err) {
+    console.error('Fare calculation error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 3. Update single fare config by ID (Admin Only)
+app.put('/api/fares/configs/:id', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Administrator privileges required.' });
+    }
+
+    const { baseFare, perKmRate, waitingChargePerMin, freeWaitingMinutes, city, isActive } = req.body;
+    const updateData = {
+      updatedBy: req.user.studentId || req.user.name || 'admin'
+    };
+
+    if (baseFare !== undefined) updateData.baseFare = Number(baseFare);
+    if (perKmRate !== undefined) updateData.perKmRate = Number(perKmRate);
+    if (waitingChargePerMin !== undefined) updateData.waitingChargePerMin = Number(waitingChargePerMin);
+    if (freeWaitingMinutes !== undefined) updateData.freeWaitingMinutes = Number(freeWaitingMinutes);
+    if (city !== undefined) updateData.city = city.trim();
+    if (isActive !== undefined) updateData.isActive = Boolean(isActive);
+
+    const updated = await FareConfigs.findByIdAndUpdate(req.params.id, updateData);
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Fare configuration not found.' });
+    }
+
+    res.json({
+      success: true,
+      message: `Fare rate for ${updated.vehicleDisplayName || updated.vehicleType} updated successfully!`,
+      config: updated
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// 4. Batch Update all fare configs (Admin Only)
+app.put('/api/fares/configs', authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Administrator privileges required.' });
+    }
+
+    const { rates } = req.body;
+    if (!Array.isArray(rates)) {
+      return res.status(400).json({ success: false, message: 'Array of rates expected.' });
+    }
+
+    const results = [];
+    for (const r of rates) {
+      const normType = normalizeVehicleType(r.vehicleType);
+      const city = r.city || 'nationwide';
+
+      let existing = await FareConfigs.findOne({ vehicleType: normType, city });
+      if (existing) {
+        const updated = await FareConfigs.findByIdAndUpdate(existing._id, {
+          baseFare: Number(r.baseFare),
+          perKmRate: Number(r.perKmRate),
+          waitingChargePerMin: Number(r.waitingChargePerMin),
+          freeWaitingMinutes: Number(r.freeWaitingMinutes !== undefined ? r.freeWaitingMinutes : 3),
+          updatedBy: req.user.studentId || req.user.name || 'admin'
+        });
+        results.push(updated);
+      } else {
+        const created = await FareConfigs.create({
+          vehicleType: normType,
+          vehicleDisplayName: r.vehicleDisplayName || (normType === 'Bike' ? 'Motorbike' : normType === 'CNG' ? 'CNG / Auto Rickshaw' : 'Personal Car'),
+          city: city,
+          baseFare: Number(r.baseFare),
+          perKmRate: Number(r.perKmRate),
+          waitingChargePerMin: Number(r.waitingChargePerMin),
+          freeWaitingMinutes: Number(r.freeWaitingMinutes !== undefined ? r.freeWaitingMinutes : 3),
+          isActive: true,
+          updatedBy: req.user.studentId || req.user.name || 'admin'
+        });
+        results.push(created);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'All dynamic fare configurations updated and synced successfully!',
+      configs: results
+    });
+  } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });

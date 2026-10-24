@@ -1,0 +1,44 @@
+[
+  {
+    "_id": "671ad0010000000000000001",
+    "vehicleType": "Bike",
+    "vehicleDisplayName": "Motorbike",
+    "city": "nationwide",
+    "baseFare": 20,
+    "perKmRate": 12,
+    "waitingChargePerMin": 0.5,
+    "freeWaitingMinutes": 3,
+    "isActive": true,
+    "updatedBy": "admin",
+    "createdAt": "2026-10-24T12:00:00.000Z",
+    "updatedAt": "2026-10-24T12:00:00.000Z"
+  },
+  {
+    "_id": "671ad0010000000000000002",
+    "vehicleType": "Car",
+    "vehicleDisplayName": "Personal Car",
+    "city": "nationwide",
+    "baseFare": 50,
+    "perKmRate": 20,
+    "waitingChargePerMin": 1.5,
+    "freeWaitingMinutes": 3,
+    "isActive": true,
+    "updatedBy": "admin",
+    "createdAt": "2026-10-24T12:00:00.000Z",
+    "updatedAt": "2026-10-24T15:37:16.572Z"
+  },
+  {
+    "_id": "671ad0010000000000000003",
+    "vehicleType": "CNG",
+    "vehicleDisplayName": "CNG / Auto Rickshaw",
+    "city": "nationwide",
+    "baseFare": 40,
+    "perKmRate": 14,
+    "waitingChargePerMin": 1,
+    "freeWaitingMinutes": 3,
+    "isActive": true,
+    "updatedBy": "admin",
+    "createdAt": "2026-10-24T12:00:00.000Z",
+    "updatedAt": "2026-10-24T12:00:00.000Z"
+  }
+]

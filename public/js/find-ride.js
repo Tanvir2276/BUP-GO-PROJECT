@@ -255,6 +255,9 @@ function openRequestModal(rideId) {
   const ride = currentRides.find(r => String(r._id) === String(rideId));
   if (!ride) return;
 
+  const costPerSeat = ride.estimatedCost || (ride.fareSnapshot && ride.fareSnapshot.totalFare) || 40;
+  const snapshot = ride.fareSnapshot;
+
   document.getElementById('modal-ride-id').value = ride._id;
   document.getElementById('modal-pickup-location').value = ride.startingLocation;
 
@@ -264,23 +267,44 @@ function openRequestModal(rideId) {
   for (let i = 1; i <= Math.min(ride.availableSeats, 4); i++) {
     const opt = document.createElement('option');
     opt.value = i;
-    opt.textContent = `${i} Seat${i > 1 ? 's' : ''} (৳ ${ride.estimatedCost * i})`;
+    opt.textContent = `${i} Seat${i > 1 ? 's' : ''} (৳ ${costPerSeat * i})`;
     seatSelect.appendChild(opt);
   }
+
+  const updateModalFareText = () => {
+    const seats = parseInt(seatSelect.value || 1, 10);
+    const total = costPerSeat * seats;
+    const calcEl = document.getElementById('modal-fare-calc-text');
+    if (calcEl) calcEl.textContent = `${seats} Seat${seats > 1 ? 's' : ''} × ৳ ${costPerSeat} = ৳ ${total}`;
+    const btn = document.getElementById('btn-submit-request');
+    if (btn) btn.textContent = `Confirm & Send Join Request — ৳ ${total}`;
+  };
+
+  seatSelect.onchange = updateModalFareText;
 
   const summary = document.getElementById('modal-ride-summary');
   summary.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
       <span style="font-weight: 700; color: var(--bup-primary); font-size: 1rem;">${ride.startingLocation} ➔ ${ride.destination}</span>
-      <span style="font-weight: 800; font-size: 1.1rem; color: var(--bup-primary-dark);">৳ ${ride.estimatedCost}/seat</span>
+      <span style="font-weight: 800; font-size: 1.25rem; color: var(--bup-primary-dark);">৳ ${costPerSeat} <small style="font-size:0.75rem; font-weight:normal;">/seat</small></span>
     </div>
-    <div style="font-size: 0.85rem; color: var(--text-muted);">
+    <div style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 10px;">
       <span>Driver: <strong>${ride.driverName}</strong> (${ride.driverDept})</span> • 
-      <span>Date: <strong>${ride.travelDate}</strong></span> • 
-      <span>Time: <strong>${ride.departureTime}</strong></span>
+      <span>Vehicle: <strong>${ride.transportationType}</strong></span> • 
+      <span>Date: <strong>${ride.travelDate}</strong> (${ride.departureTime})</span>
+    </div>
+    <div style="background: var(--bg-card); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px dashed var(--border-color); font-size: 0.82rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="color: var(--text-muted);">Authoritative Fare Total:</span>
+        <strong id="modal-fare-calc-text" style="color: var(--bup-primary); font-size: 0.95rem;">1 Seat × ৳ ${costPerSeat} = ৳ ${costPerSeat}</strong>
+      </div>
+      <div style="font-size: 0.76rem; color: var(--bup-primary);">
+        ${snapshot ? `Formula: ৳${snapshot.rates.baseFare} Base + (${snapshot.distanceKm}km × ৳${snapshot.rates.perKmRate}) • 🛡️ 3 mins free waiting time included` : 'Formula: Base Fare + Distance Rate (Authoritative BUPGO Central Store) • 🛡️ 3 mins free waiting included'}
+      </div>
     </div>
   `;
 
+  updateModalFareText();
   document.getElementById('request-modal').classList.add('active');
 }
 
@@ -335,6 +359,18 @@ async function openRideDetails(rideId) {
           <strong style="color: var(--text-main); font-size: 0.95rem;">${ride.transportationType} (${ride.vehicleModel || 'Standard'}) • ৳${ride.estimatedCost}</strong>
         </div>
       </div>
+
+      ${ride.fareSnapshot ? `
+        <div style="background: var(--bg-card); padding: 12px 14px; border-radius: var(--radius-md); border: 1px dashed var(--border-color); margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="font-size: 0.85rem; color: var(--bup-primary);">💰 Dynamic Fare Snapshot (Official BUPGO Rates):</strong>
+            <span class="badge badge-green">৳ ${ride.estimatedCost} / seat</span>
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5;">
+            Route Distance: <strong>${ride.fareSnapshot.distanceKm} km</strong> • Base: <strong>৳${ride.fareSnapshot.rates.baseFare}</strong> • Rate: <strong>৳${ride.fareSnapshot.rates.perKmRate}/km</strong> • Waiting: <strong>৳${ride.fareSnapshot.rates.waitingChargePerMin}/min</strong> (3 mins free waiting included)
+          </div>
+        </div>
+      ` : ''}
 
       <div style="margin-bottom: 20px;">
         <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Ride Guidelines & Notes:</h4>
