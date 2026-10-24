@@ -490,6 +490,8 @@ app.post('/api/requests', authenticateToken, async (req, res) => {
         title: '🎫 Seat Request Received',
         message: `${rider.name} (${rider.department}) requested ${requestedSeats} seat(s) on your ride to ${ride.destination}.`,
         type: 'seat_request',
+        rideId: ride._id,
+        recipientId: String(ride.driverId),
         targetUserId: String(ride.driverId)
       });
     } catch(e) {}
@@ -569,6 +571,8 @@ app.put('/api/requests/:id/status', authenticateToken, async (req, res) => {
         title: status === 'accepted' ? '🎉 Ride Confirmed!' : 'Ride Request Update',
         message: status === 'accepted' ? `Your ride to ${ride.destination} has been confirmed by the driver! Driver contact is now unlocked.` : `Your ride request was marked as ${status}.`,
         type: 'request_status',
+        rideId: request.rideId,
+        recipientId: String(request.riderId),
         targetUserId: String(request.riderId)
       });
     } catch(e) {}
@@ -672,10 +676,33 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-// Notifications API
-app.get('/api/notifications', async (req, res) => {
+// Notifications API (User-specific + General announcements)
+app.get('/api/notifications', optionalAuth, async (req, res) => {
   try {
-    const list = await Notifications.find({});
+    const userId = req.user ? String(req.user.id) : null;
+    let filter = {};
+
+    if (userId) {
+      // User-specific notifications for this account + general announcements
+      filter = {
+        $or: [
+          { recipientId: userId },
+          { targetUserId: userId },
+          { recipientId: 'all' },
+          { recipientId: { $exists: false } }
+        ]
+      };
+    } else {
+      // Guest users see general announcements only
+      filter = {
+        $or: [
+          { recipientId: 'all' },
+          { recipientId: { $exists: false } }
+        ]
+      };
+    }
+
+    const list = await Notifications.find(filter);
     list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     res.json({ success: true, count: list.length, notifications: list.slice(0, 30) });
   } catch (err) {

@@ -273,10 +273,17 @@ body.dark-mode .page-header-band {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 22px;
   height: fit-content;
-  position: sticky;
-  top: 90px;
+}
+
+@media (min-width: 861px) {
+  .filter-sidebar {
+    position: sticky;
+    top: 85px;
+    max-height: calc(100vh - 105px);
+    overflow-y: auto;
+  }
 }
 
 .filter-sidebar h3 {
@@ -810,6 +817,13 @@ body.dark-mode .page-header-band {
   }
   .find-ride-layout {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .filter-sidebar {
+    position: static !important;
+    margin-bottom: 25px;
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
   }
   .stats-grid {
     grid-template-columns: 1fr 1fr;

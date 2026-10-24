@@ -29,7 +29,10 @@
       <aside class="filter-sidebar">
         <h3>
           <span>Filters</span>
-          <button id="reset-filters-btn" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;">Reset</button>
+          <div style="display: flex; gap: 8px;">
+            <button id="reset-filters-btn" type="button" class="btn btn-secondary btn-sm" style="padding: 4px 10px; font-size: 0.78rem;">Reset</button>
+            <button type="submit" form="filter-form" class="btn btn-primary btn-sm" style="padding: 4px 14px; font-size: 0.78rem; font-weight: 700;">Apply</button>
+          </div>
         </h3>
 
         <form id="filter-form">

@@ -104,6 +104,7 @@ const RequestSchema = new mongoose.Schema({
 
 const NotificationSchema = new mongoose.Schema({
   recipientId: { type: String, default: 'all', index: true },
+  targetUserId: { type: String, default: 'all', index: true },
   type: { type: String, default: 'general' },
   title: { type: String, required: true },
   message: { type: String, required: true },
@@ -228,6 +229,11 @@ class NoSQLCollection {
       }
 
       if (filterVal && typeof filterVal === 'object') {
+        if ('$exists' in filterVal) {
+          const exists = docVal !== undefined && docVal !== null;
+          if (exists !== filterVal.$exists) return false;
+          continue;
+        }
         if ('$regex' in filterVal) {
           const regex = new RegExp(filterVal.$regex, filterVal.$options || 'i');
           if (!regex.test(String(docVal || ''))) return false;
