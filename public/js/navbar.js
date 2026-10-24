@@ -46,7 +46,11 @@ function toggleUserDropdown(e) {
   const menu = document.getElementById('user-dropdown-menu');
   if (!menu) return;
   userDropdownOpen = !userDropdownOpen;
-  menu.style.display = userDropdownOpen ? 'block' : 'none';
+  if (userDropdownOpen) {
+    menu.style.setProperty('display', 'block', 'important');
+  } else {
+    menu.style.setProperty('display', 'none', 'important');
+  }
 
   // Close notifications if open
   const notifPanel = document.getElementById('notifications-panel');
@@ -188,8 +192,8 @@ function renderNavbar() {
                 <span class="user-badge-chevron">⌵</span>
               </button>
 
-              <!-- Dropdown Menu -->
-              <div id="user-dropdown-menu" class="user-dropdown-menu">
+              <!-- Dropdown Menu (Guaranteed Hidden by Default) -->
+              <div id="user-dropdown-menu" class="user-menu-dropdown" style="display: none !important;">
                 <div class="user-dropdown-header">
                   <img src="${user.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name)}" alt="${user.name}" class="dropdown-header-avatar">
                   <div class="dropdown-header-info">
@@ -292,7 +296,7 @@ function renderNavbar() {
     const userMenu = document.getElementById('user-dropdown-menu');
     const userBtn = document.getElementById('user-profile-btn');
     if (userMenu && userBtn && !userMenu.contains(e.target) && !userBtn.contains(e.target)) {
-      userMenu.style.display = 'none';
+      userMenu.style.setProperty('display', 'none', 'important');
       userDropdownOpen = false;
     }
 
