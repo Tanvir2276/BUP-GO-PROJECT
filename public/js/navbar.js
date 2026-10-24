@@ -36,6 +36,34 @@ function updateThemeIcon(isDark) {
   }
 }
 
+// User Profile Dropdown Menu Handler
+let userDropdownOpen = false;
+function toggleUserDropdown(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const menu = document.getElementById('user-dropdown-menu');
+  if (!menu) return;
+  userDropdownOpen = !userDropdownOpen;
+  menu.style.display = userDropdownOpen ? 'block' : 'none';
+
+  // Close notifications if open
+  const notifPanel = document.getElementById('notifications-panel');
+  if (notifPanel && userDropdownOpen) {
+    notifPanel.style.display = 'none';
+    notificationsOpen = false;
+  }
+}
+
+function handleSignOut() {
+  Auth.clearSession();
+  showToast('Logged out successfully.', 'info');
+  setTimeout(() => {
+    window.location.href = 'index.html';
+  }, 500);
+}
+
 // Notification Drawer Toggle
 let notificationsOpen = false;
 async function toggleNotifications() {
@@ -148,21 +176,72 @@ function renderNavbar() {
             </div>
           </div>
 
-          <!-- User Pill & Square Logout Button Matching Reference Image -->
+          <!-- Professional User Pill & Dropdown Menu -->
           ${user ? `
-            <a href="profile.html" class="user-badge-pill" title="View Profile">
-              <img src="${user.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name)}" alt="${user.name}">
-              <div class="user-badge-text">
-                <span class="user-badge-title">${user.name.split(' ')[0]}</span>
-                <span class="user-badge-sub">${user.studentId}</span>
+            <div class="user-profile-wrapper" style="position: relative;">
+              <button class="user-badge-pill" id="user-profile-btn" onclick="toggleUserDropdown(event)" title="Account Menu">
+                <img src="${user.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name)}" alt="${user.name}">
+                <div class="user-badge-text">
+                  <span class="user-badge-title">${user.name.split(' ')[0]}</span>
+                  <span class="user-badge-sub">${user.studentId}</span>
+                </div>
+                <span class="user-badge-chevron">⌵</span>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <div id="user-dropdown-menu" class="user-dropdown-menu">
+                <div class="user-dropdown-header">
+                  <img src="${user.avatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name)}" alt="${user.name}" class="dropdown-header-avatar">
+                  <div class="dropdown-header-info">
+                    <strong class="dropdown-user-name">${user.name}</strong>
+                    <span class="dropdown-user-id">ID: ${user.studentId}</span>
+                    <span class="dropdown-role-tag ${user.role || 'passenger'}">
+                      ${user.role === 'admin' ? '🛡️ Administrator' : user.role === 'driver' ? '🚗 Verified Driver' : '🎓 Student Passenger'}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="user-dropdown-divider"></div>
+
+                <div class="user-dropdown-links">
+                  <a href="profile.html?tab=personal" class="user-dropdown-link-item">
+                    <span class="dropdown-link-icon">👤</span>
+                    <div>
+                      <div class="dropdown-link-title">Personal Information</div>
+                      <div class="dropdown-link-desc">View and edit personal details</div>
+                    </div>
+                  </a>
+
+                  <a href="profile.html?tab=settings" class="user-dropdown-link-item">
+                    <span class="dropdown-link-icon">⚙️</span>
+                    <div>
+                      <div class="dropdown-link-title">Settings</div>
+                      <div class="dropdown-link-desc">${user.role === 'admin' ? 'Admin controls & powers' : user.role === 'driver' ? 'Vehicle & driver rules' : 'Ride & safety preferences'}</div>
+                    </div>
+                  </a>
+
+                  ${user.role === 'admin' ? `
+                  <a href="admin.html" class="user-dropdown-link-item">
+                    <span class="dropdown-link-icon">🛡️</span>
+                    <div>
+                      <div class="dropdown-link-title">Admin Dashboard</div>
+                      <div class="dropdown-link-desc">System moderation & user management</div>
+                    </div>
+                  </a>
+                  ` : ''}
+
+                  <div class="user-dropdown-divider"></div>
+
+                  <button type="button" class="user-dropdown-link-item logout-link-btn" onclick="handleSignOut()">
+                    <span class="dropdown-link-icon" style="color: var(--bup-red);">🚪</span>
+                    <div>
+                      <div class="dropdown-link-title" style="color: var(--bup-red); font-weight: 700;">Sign Out</div>
+                      <div class="dropdown-link-desc">Log out of your BUPGO account</div>
+                    </div>
+                  </button>
+                </div>
               </div>
-              <span class="user-badge-chevron">⌵</span>
-            </a>
-            <button class="btn-logout-square" id="nav-logout-btn" title="Logout">
-              <svg width="18" height="18" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
+            </div>
           ` : `
             <a href="login.html" class="btn btn-primary btn-sm btn-nav-auth" style="border-radius: var(--radius-full); padding: 8px 18px; white-space: nowrap;">
               <span>Sign In</span>
@@ -208,8 +287,15 @@ function renderNavbar() {
     });
   }
 
-  // Close notifications on outer click
+  // Close dropdowns on outer click
   document.addEventListener('click', (e) => {
+    const userMenu = document.getElementById('user-dropdown-menu');
+    const userBtn = document.getElementById('user-profile-btn');
+    if (userMenu && userBtn && !userMenu.contains(e.target) && !userBtn.contains(e.target)) {
+      userMenu.style.display = 'none';
+      userDropdownOpen = false;
+    }
+
     const panel = document.getElementById('notifications-panel');
     const bell = document.getElementById('notif-bell-btn');
     if (panel && bell && !panel.contains(e.target) && !bell.contains(e.target)) {

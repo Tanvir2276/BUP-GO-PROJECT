@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Profile - BUPGO Carpool</title>
+  <title>Account Profile & Settings - BUPGO Carpool</title>
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,96 +18,212 @@
   <!-- Page Header Band -->
   <div class="page-header-band">
     <div class="container">
-      <h1 class="page-header-title">Student Profile & Verification</h1>
-      <p class="page-header-sub">Your verified BUP identity, carpool statistics, and personal transportation preferences.</p>
+      <h1 class="page-header-title">Student Account & Preferences</h1>
+      <p class="page-header-sub">Manage your verified BUP identity, personal information, and customized role settings.</p>
     </div>
   </div>
 
-  <div class="container" style="max-width: 860px; margin-bottom: 70px;">
-    <!-- Profile Card -->
-    <div class="profile-card">
-      <div class="profile-header-grid">
-        <img id="prof-avatar" src="" alt="Avatar" class="profile-avatar-lg">
-        <div class="profile-header-details">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <h2 id="prof-name">Student Name</h2>
-            <span class="badge badge-green" id="prof-role-badge">Verified Student</span>
+  <div class="container" style="max-width: 880px; margin-bottom: 70px;">
+    <!-- Profile Tabs Switcher -->
+    <div class="profile-tabs-wrapper">
+      <button type="button" class="profile-tab-btn active" id="tab-btn-personal" onclick="switchProfileTab('personal')">
+        <span>👤 Personal Information</span>
+      </button>
+      <button type="button" class="profile-tab-btn" id="tab-btn-settings" onclick="switchProfileTab('settings')">
+        <span>⚙️ Settings & Preferences</span>
+      </button>
+    </div>
+
+    <!-- =========================================================
+         TAB 1: PERSONAL INFORMATION
+         ========================================================= -->
+    <div id="tab-personal-section">
+      <!-- Overview Card -->
+      <div class="profile-card">
+        <div class="profile-header-grid">
+          <div style="position: relative; display: inline-block;">
+            <img id="prof-avatar" src="" alt="Avatar" class="profile-avatar-lg">
+            <button type="button" onclick="chooseNewAvatar()" class="btn btn-secondary btn-sm" style="position: absolute; bottom: -6px; right: -6px; border-radius: var(--radius-full); padding: 3px 8px; font-size: 0.7rem; box-shadow: var(--shadow-sm);" title="Choose New Avatar">
+              ✏️ Avatar
+            </button>
           </div>
-          <p id="prof-sub">Department of Information & Communication Technology (ICT)</p>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" id="prof-email">student@bup.edu.bd</p>
+          <div class="profile-header-details">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <h2 id="prof-name">Student Name</h2>
+              <span class="badge badge-green" id="prof-role-badge">Verified Student</span>
+            </div>
+            <p id="prof-sub">Department of Information & Communication Technology (ICT)</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" id="prof-email">student@bup.edu.bd</p>
+          </div>
+        </div>
+
+        <!-- Info Details Grid -->
+        <div class="profile-info-grid">
+          <div class="profile-info-item">
+            <label>Student ID</label>
+            <span id="prof-id">--</span>
+          </div>
+          <div class="profile-info-item">
+            <label>Department</label>
+            <span id="prof-dept">--</span>
+          </div>
+          <div class="profile-info-item">
+            <label>Batch / Session</label>
+            <span id="prof-batch">--</span>
+          </div>
+          <div class="profile-info-item">
+            <label>Contact Phone</label>
+            <span id="prof-phone">--</span>
+          </div>
+          <div class="profile-info-item">
+            <label>Primary Role</label>
+            <span id="prof-role">--</span>
+          </div>
+          <div class="profile-info-item">
+            <label>Vehicle Model</label>
+            <span id="prof-vehicle">--</span>
+          </div>
+        </div>
+
+        <!-- Bio / Note -->
+        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+          <label style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 6px;">
+            Student Bio & Commute Notes
+          </label>
+          <p id="prof-bio" style="font-size: 0.95rem; color: var(--text-main); font-style: italic;">
+            --
+          </p>
+        </div>
+
+        <!-- Carpooling Activity Badges -->
+        <div style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap;">
+          <span class="badge badge-blue" id="prof-rides-offered-badge">🚘 Rides Offered: 0</span>
+          <span class="badge badge-purple" id="prof-rides-taken-badge">🎫 Bookings Made: 0</span>
+          <span class="badge badge-green">🛡️ BUP ID Verified</span>
         </div>
       </div>
 
-      <!-- Info Details Grid -->
-      <div class="profile-info-grid">
-        <div class="profile-info-item">
-          <label>Student ID</label>
-          <span id="prof-id">--</span>
+      <!-- Edit Personal Information Card -->
+      <div class="offer-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <div>
+            <h3 style="font-size: 1.22rem; font-weight: 800; color: var(--text-main);">Edit Personal Information</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">Update your details and keep your contact number current for rides.</p>
+          </div>
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--bup-primary); background: var(--bup-primary-soft); padding: 4px 10px; border-radius: var(--radius-full);">
+            Live Sync
+          </span>
         </div>
-        <div class="profile-info-item">
-          <label>Department</label>
-          <span id="prof-dept">--</span>
-        </div>
-        <div class="profile-info-item">
-          <label>Batch / Session</label>
-          <span id="prof-batch">--</span>
-        </div>
-        <div class="profile-info-item">
-          <label>Contact Phone</label>
-          <span id="prof-phone">--</span>
-        </div>
-        <div class="profile-info-item">
-          <label>Primary Role</label>
-          <span id="prof-role">--</span>
-        </div>
-        <div class="profile-info-item">
-          <label>Vehicle Model</label>
-          <span id="prof-vehicle">--</span>
-        </div>
-      </div>
 
-      <!-- Bio / Note -->
-      <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-        <label style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 6px;">
-          Student Bio & Commute Notes
-        </label>
-        <p id="prof-bio" style="font-size: 0.95rem; color: var(--text-main); font-style: italic;">
-          --
-        </p>
-      </div>
+        <form id="profile-edit-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="edit-name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Phone (WhatsApp)</label>
+              <input type="tel" id="edit-phone" class="form-control" placeholder="017xxxxxxxx" required>
+            </div>
+          </div>
 
-      <!-- Carpooling Activity Badges -->
-      <div style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap;">
-        <span class="badge badge-blue" id="prof-rides-offered-badge">🚘 Rides Offered: 0</span>
-        <span class="badge badge-purple" id="prof-rides-taken-badge">🎫 Bookings Made: 0</span>
-        <span class="badge badge-green">🛡️ BUP ID Verified</span>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Department / Faculty</label>
+              <select id="edit-dept" class="form-control">
+                <option value="ICT (ICE)">ICT (Information & Communication Engineering)</option>
+                <option value="Computer Science & Engineering">Computer Science & Engineering (CSE)</option>
+                <option value="BBA General">BBA General (FBS)</option>
+                <option value="Finance & Banking">Finance & Banking (FBS)</option>
+                <option value="Marketing">Marketing (FBS)</option>
+                <option value="Economics">Economics (FASS)</option>
+                <option value="Public Administration">Public Administration (FASS)</option>
+                <option value="International Relations">International Relations (FASS)</option>
+                <option value="Law">Law & Human Rights (FSSS)</option>
+                <option value="Mass Communication & Journalism">Mass Communication & Journalism</option>
+                <option value="ICT Laboratory Admin">ICT Laboratory Admin (Staff)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Batch</label>
+              <input type="text" id="edit-batch" class="form-control" placeholder="e.g. BICE-2024 / BCSE-2023">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Academic Session</label>
+              <input type="text" id="edit-session" class="form-control" placeholder="e.g. 2021-22 / 2022-23">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vehicle Model (Optional)</label>
+              <input type="text" id="edit-vehicle" class="form-control" placeholder="e.g. Toyota Axio / Yamaha FZS">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Commuting Routine / Bio</label>
+            <textarea id="edit-bio" class="form-control" placeholder="Describe your daily route to/from BUP, departure timing habits, or carpool preferences..."></textarea>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px;">
+            <button type="submit" class="btn btn-primary" id="btn-save-profile" style="padding: 10px 24px; font-weight: 700;">
+              💾 Save & Update Information
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
-    <!-- Edit Profile Card -->
-    <div class="offer-card">
-      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;">Update Profile Information</h3>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Keep your phone number and commute preferences up to date.</p>
+    <!-- =========================================================
+         TAB 2: SETTINGS & PREFERENCES (Role-Specific Powers)
+         ========================================================= -->
+    <div id="tab-settings-section" style="display: none;">
+      <!-- Role Badge Summary -->
+      <div class="settings-card" style="background: linear-gradient(135deg, rgba(0, 72, 43, 0.08) 0%, rgba(212, 155, 41, 0.08) 100%);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; color: var(--bup-primary); letter-spacing: 0.5px;">Current Active Mode</span>
+            <h3 id="settings-role-title" style="font-size: 1.35rem; font-weight: 800; margin-top: 2px;">Student Passenger</h3>
+          </div>
+          <span class="badge badge-green" id="settings-role-pill" style="font-size: 0.88rem; padding: 6px 14px;">
+            Verified BUP Member
+          </span>
+        </div>
+      </div>
 
-      <form id="profile-edit-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Phone Number</label>
-            <input type="tel" id="edit-phone" class="form-control" required>
+      <!-- DYNAMIC ROLE-SPECIFIC SETTINGS -->
+      <div id="role-settings-content">
+        <!-- Content will be dynamically rendered based on passenger, driver, or admin -->
+      </div>
+
+      <!-- Common Security Card: Change Password -->
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <div class="settings-card-title">
+            <span>🔒</span> Account Security & Password
           </div>
-          <div class="form-group">
-            <label class="form-label">Vehicle Model (If Driver)</label>
-            <input type="text" id="edit-vehicle" class="form-control" placeholder="e.g. Toyota Axio / Yamaha FZ">
-          </div>
+          <span style="font-size: 0.78rem; color: var(--text-muted);">Encrypted</span>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Bio / Commuting Routine</label>
-          <textarea id="edit-bio" class="form-control" placeholder="e.g. Regular commuter from Mirpur 10. Always punctual for morning classes."></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="btn-save-profile">Save Changes</button>
-      </form>
+        <form id="change-password-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <input type="password" id="pw-current" class="form-control" placeholder="••••••••" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password (Min 6 chars)</label>
+              <input type="password" id="pw-new" class="form-control" placeholder="••••••••" required>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+            <button type="submit" class="btn btn-secondary" id="btn-change-password" style="padding: 9px 20px; font-weight: 700;">
+              🔑 Update Password
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 

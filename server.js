@@ -189,20 +189,52 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 // Update Profile
 app.put('/api/auth/profile', authenticateToken, async (req, res) => {
   try {
-    const { name, phone, department, batch, vehicleType, vehicleModel, bio, avatar } = req.body;
+    const { name, phone, department, batch, session, role, vehicleType, vehicleModel, bio, avatar, settings, emergencyContact } = req.body;
     const updateData = {};
     if (name) updateData.name = name.trim();
-    if (phone) updateData.phone = phone.trim();
+    if (phone !== undefined) updateData.phone = phone.trim();
     if (department) updateData.department = department.trim();
-    if (batch) updateData.batch = batch.trim();
+    if (batch !== undefined) updateData.batch = batch.trim();
+    if (session !== undefined) updateData.session = session.trim();
+    if (role && ['passenger', 'driver', 'admin'].includes(role)) updateData.role = role;
     if (vehicleType !== undefined) updateData.vehicleType = vehicleType;
     if (vehicleModel !== undefined) updateData.vehicleModel = vehicleModel;
     if (bio !== undefined) updateData.bio = bio;
     if (avatar) updateData.avatar = avatar;
+    if (settings) updateData.settings = settings;
+    if (emergencyContact) updateData.emergencyContact = emergencyContact;
 
     const updatedUser = await Users.findByIdAndUpdate(req.user.id, updateData);
-    const { password: _, ...userSafe } = updatedUser;
+    const { password: _, passwordHash: __, ...userSafe } = updatedUser;
     res.json({ success: true, message: 'Profile updated successfully!', user: userSafe });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Change Password API
+app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide current and new password.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
+    }
+
+    const user = await Users.findById(req.user.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+    const match = await bcrypt.compare(currentPassword, user.password || user.passwordHash);
+    if (!match) {
+      return res.status(400).json({ success: false, message: 'Current password does not match.' });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await Users.findByIdAndUpdate(req.user.id, { password: newHash, passwordHash: newHash });
+
+    res.json({ success: true, message: 'Password changed successfully!' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
