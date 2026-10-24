@@ -9,12 +9,16 @@ const path = require('path');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
+const os = require('os');
+
 let DATA_DIR = path.join(__dirname, 'nosql_data');
 // Support serverless platforms like Vercel where root filesystem is read-only
-if (process.env.VERCEL) {
-  const tmpDir = path.join('/tmp', 'bupgo_data');
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, { recursive: true });
+try {
+  if (process.env.VERCEL) {
+    const tmpDir = path.join(os.tmpdir(), 'bupgo_data');
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
     const originalDir = path.join(__dirname, 'nosql_data');
     if (fs.existsSync(originalDir)) {
       for (const file of fs.readdirSync(originalDir)) {
@@ -23,10 +27,13 @@ if (process.env.VERCEL) {
         } catch (e) {}
       }
     }
+    DATA_DIR = tmpDir;
+  } else if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
   }
-  DATA_DIR = tmpDir;
-} else if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+} catch (e) {
+  console.warn('Using default data directory:', e.message);
+  DATA_DIR = path.join(__dirname, 'nosql_data');
 }
 
 let dbMode = 'nosql_json_store'; // 'mongodb' or 'nosql_json_store'
@@ -170,26 +177,41 @@ class NoSQLCollection {
   constructor(name) {
     this.name = name;
     this.filePath = path.join(DATA_DIR, `${name}.json`);
-    if (!fs.existsSync(this.filePath)) {
-      fs.writeFileSync(this.filePath, JSON.stringify([], null, 2), 'utf-8');
+    this.memoryData = null;
+    try {
+      if (!fs.existsSync(this.filePath)) {
+        fs.writeFileSync(this.filePath, JSON.stringify([], null, 2), 'utf-8');
+      }
+    } catch (e) {
+      this.memoryData = [];
     }
   }
 
   _read() {
+    if (this.memoryData && this.memoryData.length > 0) return this.memoryData;
     try {
-      const raw = fs.readFileSync(this.filePath, 'utf-8');
-      return JSON.parse(raw || '[]');
+      if (fs.existsSync(this.filePath)) {
+        const raw = fs.readFileSync(this.filePath, 'utf-8');
+        const parsed = JSON.parse(raw || '[]');
+        if (parsed.length > 0) return parsed;
+      }
+      const fallbackPath = path.join(__dirname, 'nosql_data', `${this.name}.json`);
+      if (fs.existsSync(fallbackPath)) {
+        const raw = fs.readFileSync(fallbackPath, 'utf-8');
+        return JSON.parse(raw || '[]');
+      }
+      return this.memoryData || [];
     } catch (err) {
-      console.error(`Error reading NoSQL collection ${this.name}:`, err);
-      return [];
+      return this.memoryData || [];
     }
   }
 
   _write(data) {
+    this.memoryData = data;
     try {
       fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2), 'utf-8');
     } catch (err) {
-      console.error(`Error writing NoSQL collection ${this.name}:`, err);
+      // In serverless read-only filesystem, gracefully retained in memory
     }
   }
 
