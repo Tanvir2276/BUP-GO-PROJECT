@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offer a Ride - BUPGO Carpool</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <!-- Header Mount -->
+  <div id="navbar-mount"></div>
+
+  <!-- Page Header Band -->
+  <div class="page-header-band">
+    <div class="container">
+      <h1 class="page-header-title">Offer a Ride to Classmates</h1>
+      <p class="page-header-sub">Have empty seats in your car, bike, or planning to share a CNG to BUP? Post your trip plan here.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="offer-ride-container">
+      <div class="offer-card">
+        <h2>Post Your Carpool / Ride Share</h2>
+        <p>Fill out the travel details below to publish your ride into the BUPGO NoSQL database.</p>
+
+        <!-- Trip Direction Selector -->
+        <div style="background: var(--bup-primary-soft); padding: 14px 18px; border-radius: var(--radius-md); margin-bottom: 22px; border: 1px solid rgba(4, 106, 56, 0.2);">
+          <label style="font-size: 0.85rem; font-weight: 700; color: var(--bup-primary-dark); display: block; margin-bottom: 8px;">
+            Trip Type & Direction:
+          </label>
+          <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; font-size: 0.92rem;">
+              <input type="radio" name="offer-direction" value="to_campus" checked onchange="setOfferDirection('to_campus')">
+              <span>🎓 Morning Commute: City ➔ BUP Campus</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; font-size: 0.92rem;">
+              <input type="radio" name="offer-direction" value="return" onchange="setOfferDirection('return')">
+              <span>🏠 Return Trip: BUP Campus ➔ Home / City</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Route Presets -->
+        <div style="margin-bottom: 22px;">
+          <label style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px;">
+            Quick Route Templates:
+          </label>
+          <div class="quick-hotspots-picker" id="offer-chips-container">
+            <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Mirpur 10 Circle', 'BUP Campus (Main Gate)', 40)">Mirpur 10 ➔ BUP (৳40)</button>
+            <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Uttara Sector 7 (House Building)', 'BUP Campus (Main Gate)', 70)">Uttara ➔ BUP (৳70)</button>
+            <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Dhanmondi 27 (Rapa Plaza)', 'BUP Campus (Main Gate)', 80)">Dhanmondi ➔ BUP (৳80)</button>
+            <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Savar Cantonment (Sena Auditorium)', 'BUP Campus (Main Gate)', 90)">Savar ➔ BUP (৳90)</button>
+            <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Farmgate Metro Station', 'BUP Campus (Main Gate)', 50)">Farmgate ➔ BUP (৳50)</button>
+            <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Mohakhali Bus Terminal', 'BUP Campus (Main Gate)', 60)">Mohakhali ➔ BUP (৳60)</button>
+            <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('ECB Chattar (Matikata)', 'BUP Campus (Main Gate)', 30)">ECB Chattar ➔ BUP (৳30)</button>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--bup-primary); margin-top: 8px; font-weight: 600;">
+            ✨ Autocomplete Active: Type any location to choose from 120+ spots across Dhaka, Savar, Gazipur, Narayanganj & BUP campus!
+          </div>
+        </div>
+
+        <form id="offer-ride-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                <span>Starting Point (Pickup)</span>
+                <span style="color: var(--bup-red)">*</span>
+              </label>
+              <input type="text" id="offer-start" class="form-control" placeholder="e.g. Mirpur 10 Circle" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Destination (Drop-off)</span>
+                <span style="color: var(--bup-red)">*</span>
+              </label>
+              <input type="text" id="offer-dest" class="form-control" value="BUP Campus, Mirpur Cantonment" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                <span>Travel Date</span>
+                <span style="color: var(--bup-red)">*</span>
+              </label>
+              <input type="date" id="offer-date" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Departure Time</span>
+                <span style="color: var(--bup-red)">*</span>
+              </label>
+              <input type="text" id="offer-time" class="form-control" placeholder="e.g. 07:45 AM or 04:30 PM" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                <span>Transportation Type</span>
+                <span style="color: var(--bup-red)">*</span>
+              </label>
+              <select id="offer-vehicle" class="form-control" onchange="adjustSeatDefaults(this.value)" required>
+                <option value="Car">Personal Car</option>
+                <option value="Motorbike">Motorbike</option>
+                <option value="CNG">CNG / Auto Rickshaw</option>
+                <option value="Microbus">Microbus / Van</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Available Empty Seats</span>
+                <span style="color: var(--bup-red)">*</span>
+              </label>
+              <input type="number" id="offer-seats" class="form-control" min="1" max="6" value="3" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">
+                <span>Vehicle Model / Reg (Optional)</span>
+                <span class="form-label-hint">e.g. Toyota Axio / FZS V3</span>
+              </label>
+              <input type="text" id="offer-model" class="form-control" placeholder="e.g. Toyota Corolla / Yamaha FZ">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Estimated Fare per Seat (BDT ৳)</span>
+                <span style="color: var(--bup-red)">*</span>
+              </label>
+              <input type="number" id="offer-cost" class="form-control" min="0" placeholder="e.g. 40" value="40" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span>Additional Information & Rules</span>
+              <span class="form-label-hint">Route stops, AC status, luggage space, etc.</span>
+            </label>
+            <textarea id="offer-info" class="form-control" placeholder="e.g. Leaving on time from Mirpur 10 roundabout. AC will be on. Only BUP students welcome."></textarea>
+          </div>
+
+          <button type="submit" id="submit-ride-btn" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+            🚗 Publish Ride to BUPGO
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Mount -->
+  <div id="footer-mount"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/locations.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/offer-ride.js"></script>
+</body>
+</html>

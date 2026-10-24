@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "03fb6238c32dddbd215b1e58",
+    "createdAt": "2026-10-23T16:02:49.477Z",
+    "updatedAt": "2026-10-23T16:02:49.477Z",
+    "rideId": "6cb50bcaa9dd7beabb52cc49",
+    "riderId": "1928cde9857d68110315939e",
+    "riderName": "Fatima Zahra",
+    "riderStudentId": "2254901045",
+    "riderDept": "Computer Science & Engineering",
+    "riderPhone": "01655667788",
+    "seatsRequested": 1,
+    "pickupLocation": "Uttara House Building (Sector 7)",
+    "notes": "",
+    "status": "pending"
+  },
+  {
+    "_id": "bce4aace818d72a6e0759c39",
+    "createdAt": "2026-10-23T16:00:27.149Z",
+    "updatedAt": "2026-10-23T16:00:27.149Z",
+    "rideId": "6cb50bcaa9dd7beabb52cc49",
+    "riderId": "0f860b2a3a6e8af99d02522d",
+    "riderName": "Munshi Tanvir Hossain",
+    "riderStudentId": "2254901076",
+    "riderDept": "ICT (ICE)",
+    "riderPhone": "01711223344",
+    "seatsRequested": 1,
+    "pickupLocation": "Uttara House Building (Sector 7)",
+    "notes": "",
+    "status": "pending"
+  },
+  {
+    "_id": "623ffc4dbf474ad96d1fa067",
+    "createdAt": "2026-10-23T15:49:39.949Z",
+    "updatedAt": "2026-10-23T15:49:39.949Z",
+    "rideId": "9ff9d773c351afae07dec01c",
+    "riderId": "1928cde9857d68110315939e",
+    "riderName": "Fatima Zahra",
+    "riderStudentId": "2254901045",
+    "riderDept": "Computer Science & Engineering",
+    "riderPhone": "01655667788",
+    "seatsRequested": 1,
+    "pickupLocation": "Mirpur 10 roundabout",
+    "notes": "Heading to ICE 3206 lab class.",
+    "status": "pending"
+  },
+  {
+    "_id": "9869b826627cabcb1af722b1",
+    "createdAt": "2026-10-23T15:49:39.948Z",
+    "updatedAt": "2026-10-23T15:49:39.948Z",
+    "rideId": "9ff9d773c351afae07dec01c",
+    "riderId": "424003702a15ac9abff963a3",
+    "riderName": "Ayman Sadik",
+    "riderStudentId": "2254901010",
+    "riderDept": "BBA General",
+    "riderPhone": "01933445566",
+    "seatsRequested": 1,
+    "pickupLocation": "Mirpur 10 Subway",
+    "notes": "Have 8:30 AM mid exam in FBS building. Will be waiting at 7:40 AM.",
+    "status": "accepted"
+  }
+]

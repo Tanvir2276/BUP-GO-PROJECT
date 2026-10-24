@@ -1,0 +1,23 @@
+[
+  {
+    "_id": "notif_1",
+    "createdAt": "2026-10-23T17:00:00.000Z",
+    "title": "🚗 New Ride Available!",
+    "message": "Munshi Tanvir Hossain posted a morning ride: Mirpur 10 Circle ➔ BUP Campus (Main Gate) at 07:45 AM - ৳40/seat.",
+    "type": "ride_posted"
+  },
+  {
+    "_id": "notif_2",
+    "createdAt": "2026-10-23T16:45:00.000Z",
+    "title": "🎉 Return Carpool Confirmed",
+    "message": "Sulayman Akhand Rahul confirmed student booking for return ride BUP Campus ➔ Uttara Sector 7.",
+    "type": "request_status"
+  },
+  {
+    "_id": "notif_3",
+    "createdAt": "2026-10-23T16:00:00.000Z",
+    "title": "🛡️ Campus Safety Protocol Active",
+    "message": "Mirpur Cantonment checkpost student verification active. Ensure your BUP ID is with you.",
+    "type": "security"
+  }
+]

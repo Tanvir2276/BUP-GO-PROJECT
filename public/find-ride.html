@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find a Ride - BUPGO Carpool</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <!-- Header Mount -->
+  <div id="navbar-mount"></div>
+
+  <!-- Page Header Band -->
+  <div class="page-header-band">
+    <div class="container">
+      <h1 class="page-header-title">Find a Student Ride</h1>
+      <p class="page-header-sub">Search available carpools and bike shares offered by BUP students across Dhaka city.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="find-ride-layout">
+      <!-- Filter Sidebar -->
+      <aside class="filter-sidebar">
+        <h3>
+          <span>Filters</span>
+          <button id="reset-filters-btn" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.75rem;">Reset</button>
+        </h3>
+
+        <form id="filter-form">
+          <div class="form-group">
+            <label class="form-label">Trip Direction</label>
+            <select id="filter-direction" class="form-control" onchange="handleDirectionChange(this.value)">
+              <option value="all">All Trips</option>
+              <option value="to_campus">🎓 Going to BUP Campus</option>
+              <option value="return">🏠 Returning from BUP Campus</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Pickup Point</label>
+            <input type="text" id="filter-start" class="form-control" placeholder="e.g. Mirpur, Uttara, Dhanmondi">
+          </div>
+
+          <div style="text-align: center; margin: -6px 0 6px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="swapLocations()" style="font-size: 0.75rem; padding: 2px 10px;" title="Swap Pickup and Drop-off">
+              ⇄ Swap Locations
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Destination</label>
+            <input type="text" id="filter-dest" class="form-control" placeholder="e.g. BUP Campus">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Travel Date</label>
+            <input type="date" id="filter-date" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Vehicle Type</label>
+            <select id="filter-vehicle" class="form-control">
+              <option value="All">All Vehicles</option>
+              <option value="Car">Car</option>
+              <option value="Motorbike">Motorbike</option>
+              <option value="CNG">CNG / Auto</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Seats Needed</label>
+            <select id="filter-seats" class="form-control">
+              <option value="">Any</option>
+              <option value="1">At least 1 seat</option>
+              <option value="2">At least 2 seats</option>
+              <option value="3">At least 3 seats</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Apply Filters</button>
+        </form>
+      </aside>
+
+      <!-- Rides List Main Area -->
+      <main>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <h2 style="font-size: 1.25rem; font-weight: 700;" id="results-count-heading">Available Rides</h2>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label for="filter-sort" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Sort By:</label>
+            <select id="filter-sort" class="form-control" style="width: auto; padding: 6px 12px; font-size: 0.85rem;" onchange="loadRides()">
+              <option value="top_rated" selected>⭐ Top Rated First</option>
+              <option value="lowest_fare">💰 Lowest Fare</option>
+              <option value="time">⏰ Departure Time</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="rides-list-container" id="rides-list-container">
+          <!-- Dynamically populated -->
+          <div style="text-align: center; padding: 50px; color: var(--text-muted);">
+            Searching BUP rides...
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Request Ride -->
+  <div class="modal-overlay" id="request-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Request to Join Ride</h3>
+        <button class="modal-close" onclick="closeRequestModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-ride-summary" style="background: #f8fafc; padding: 14px; border-radius: var(--radius-md); margin-bottom: 18px; border: 1px solid var(--border-color);">
+          <!-- Summary inserted dynamically -->
+        </div>
+
+        <form id="modal-request-form">
+          <input type="hidden" id="modal-ride-id">
+
+          <div class="form-group">
+            <label class="form-label">Seats Required</label>
+            <select id="modal-seats-req" class="form-control" required>
+              <option value="1">1 Seat</option>
+              <option value="2">2 Seats</option>
+              <option value="3">3 Seats</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Your Exact Pickup Spot</label>
+            <input type="text" id="modal-pickup-location" class="form-control" placeholder="e.g. Near Mirpur 10 Metro Station exit 2" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <span>Message to Driver (Optional)</span>
+              <span class="form-label-hint">Class time, bag info, etc.</span>
+            </label>
+            <textarea id="modal-notes" class="form-control" placeholder="e.g. I have 8:30 AM class in FST. Will be at pickup point 5 mins early!"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+            Send Join Request
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Full Ride Details -->
+  <div class="modal-overlay" id="details-modal">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Ride & Driver Details</h3>
+        <button class="modal-close" onclick="closeDetailsModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="details-modal-body">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="modal-footer" id="details-modal-footer">
+        <button class="btn btn-secondary" onclick="closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Mount -->
+  <div id="footer-mount"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/locations.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/find-ride.js"></script>
+</body>
+</html>

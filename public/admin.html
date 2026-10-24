@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - BUPGO Carpool</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <!-- Header Mount -->
+  <div id="navbar-mount"></div>
+
+  <!-- Page Header Band -->
+  <div class="page-header-band">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 class="page-header-title">Administrator & Database Console</h1>
+          <p class="page-header-sub">System metrics, student management, and real-time NoSQL document store status.</p>
+        </div>
+        <div>
+          <span class="db-pill" id="admin-db-pill">🟢 NoSQL Connected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" style="margin-bottom: 70px;">
+    <!-- System Statistics Counters -->
+    <div class="stats-grid" style="margin-bottom: 35px;">
+      <div class="feature-card" style="padding: 20px;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Students</span>
+        <h2 id="adm-students" style="font-size: 2.2rem; color: var(--bup-primary); margin-top: 4px;">--</h2>
+      </div>
+
+      <div class="feature-card" style="padding: 20px;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Active Rides</span>
+        <h2 id="adm-active-rides" style="font-size: 2.2rem; color: var(--bup-gold); margin-top: 4px;">--</h2>
+      </div>
+
+      <div class="feature-card" style="padding: 20px;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Carpool Requests</span>
+        <h2 id="adm-requests" style="font-size: 2.2rem; color: var(--bup-blue); margin-top: 4px;">--</h2>
+      </div>
+
+      <div class="feature-card" style="padding: 20px;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">CO2 Reduction</span>
+        <h2 id="adm-co2" style="font-size: 2.2rem; color: #16a34a; margin-top: 4px;">-- kg</h2>
+      </div>
+    </div>
+
+    <!-- Database Info Card -->
+    <div style="background: #f1f5f9; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap;">
+      <div>
+        <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-main);">🗄️ Database Architecture: NoSQL Document Storage</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;" id="adm-db-details">
+          Engine: NoSQL Document Store • JSON/BSON format
+        </p>
+      </div>
+      <div>
+        <button class="btn btn-secondary btn-sm" onclick="loadAdminData()">Refresh Live Data</button>
+      </div>
+    </div>
+
+    <!-- Quick Admin Tools (Export & Broadcast) -->
+    <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 14px 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="exportData('json')">
+          📥 Download Rides Data (JSON)
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="exportData('csv')">
+          📊 Export Student Roster (CSV)
+        </button>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 0.82rem; color: var(--text-muted);">Campus Security Control: <strong>02-8000441</strong></span>
+        <button class="btn btn-primary btn-sm" onclick="broadcastNotice()">
+          📢 Post Campus Announcement
+        </button>
+      </div>
+    </div>
+
+    <!-- Registered Students Table -->
+    <div class="admin-table-container">
+      <div class="admin-table-header">
+        <h3>Registered BUP Students</h3>
+        <span style="font-size: 0.85rem; color: var(--text-muted);" id="students-count-badge">Total: 0</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Student ID</th>
+              <th>Department</th>
+              <th>Batch</th>
+              <th>Role</th>
+              <th>Phone</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody id="table-students-body">
+            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading students...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Active Rides Table -->
+    <div class="admin-table-container">
+      <div class="admin-table-header">
+        <h3>All Posted Rides</h3>
+        <span style="font-size: 0.85rem; color: var(--text-muted);" id="rides-count-badge">Total: 0</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Driver</th>
+              <th>Route</th>
+              <th>Date & Time</th>
+              <th>Vehicle</th>
+              <th>Seats Left</th>
+              <th>Fare</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="table-rides-body">
+            <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading rides...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Mount -->
+  <div id="footer-mount"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

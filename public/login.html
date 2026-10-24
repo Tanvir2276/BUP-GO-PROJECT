@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Login & Registration - BUPGO</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <!-- Header Mount -->
+  <div id="navbar-mount"></div>
+
+  <div class="container">
+    <div class="auth-wrapper">
+      <div class="auth-header">
+        <div style="font-size: 2.2rem; margin-bottom: 8px;">🚗</div>
+        <h2>BUPGO Student Portal</h2>
+        <p>Access your campus carpooling account</p>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="auth-switcher">
+        <button class="auth-switch-btn active" id="tab-login-btn" onclick="toggleAuthTab('login')">Sign In</button>
+        <button class="auth-switch-btn" id="tab-register-btn" onclick="toggleAuthTab('register')">Register New Account</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-login">
+        <div class="form-group">
+          <label class="form-label">Student ID or BUP Email</label>
+          <input type="text" id="login-id" class="form-control" placeholder="e.g. 2254901076 or tanvir.ice@bup.edu.bd" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+          Sign In to BUPGO
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="form-register" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="reg-name" class="form-control" placeholder="e.g. Munshi Tanvir Hossain" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Student ID</label>
+            <input type="text" id="reg-studentid" class="form-control" placeholder="e.g. 2254901076" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input type="text" id="reg-dept" class="form-control" placeholder="e.g. ICT (ICE)" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Batch</label>
+            <input type="text" id="reg-batch" class="form-control" placeholder="e.g. BICE-2024" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="reg-phone" class="form-control" placeholder="e.g. 01711223344" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">BUP Student Email</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="e.g. student@bup.edu.bd" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Primary Role</label>
+            <select id="reg-role" class="form-control">
+              <option value="driver" selected>🚗 Student Driver (Can Offer Rides)</option>
+              <option value="passenger">🎒 Student Passenger (Need Rides)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vehicle Info (Optional)</label>
+            <input type="text" id="reg-vehicle" class="form-control" placeholder="e.g. Toyota Axio / Yamaha FZS">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="reg-pass" class="form-control" placeholder="Create a secure password" minlength="4" required>
+        </div>
+
+        <button type="submit" id="btn-reg-submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 10px;">
+          Create Student Account
+        </button>
+      </form>
+
+      <!-- Quick 1-Click Demo Accounts for Evaluators / Defense -->
+      <div class="quick-demo-accounts">
+        <h4>⚡ Quick 1-Click Demo Accounts (For Lab Testing)</h4>
+        <div class="demo-pills" id="demo-users-pills">
+          <!-- Dynamically loaded from /api/auth/quick-users -->
+          <button type="button" class="demo-pill-btn" onclick="quickLogin('2254901076', 'bup12345')">
+            <div>
+              <strong>Munshi Tanvir Hossain (Driver)</strong>
+              <span>ID: 2254901076 • Dept: ICT • Toyota Axio</span>
+            </div>
+            <span class="badge badge-green">Click to Login</span>
+          </button>
+
+          <button type="button" class="demo-pill-btn" onclick="quickLogin('2354900901014', 'bup12345')">
+            <div>
+              <strong>Sulayman Akhand Rahul (Driver)</strong>
+              <span>ID: 2354900901014 • Dept: ICT • Motorbike</span>
+            </div>
+            <span class="badge badge-green">Click to Login</span>
+          </button>
+
+          <button type="button" class="demo-pill-btn" onclick="quickLogin('2254901045', 'bup12345')">
+            <div>
+              <strong>Fatima Zahra (Passenger)</strong>
+              <span>ID: 2254901045 • Dept: CSE • Mirpur Commute</span>
+            </div>
+            <span class="badge badge-blue">Click to Login</span>
+          </button>
+
+          <button type="button" class="demo-pill-btn" onclick="quickLogin('admin@bup.edu.bd', 'admin123')">
+            <div>
+              <strong>System Administrator</strong>
+              <span>admin@bup.edu.bd • ICT Lab Admin</span>
+            </div>
+            <span class="badge badge-purple">Click to Login</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Mount -->
+  <div id="footer-mount"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

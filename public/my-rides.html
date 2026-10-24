@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Rides - BUPGO Carpool</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <!-- Dynamic Universal Header Mount -->
+  <div id="navbar-mount"></div>
+
+  <!-- Page Header Band -->
+  <div class="page-header-band">
+    <div class="container">
+      <h1 class="page-header-title">My Rides & Bookings</h1>
+      <p class="page-header-sub">Manage rides you've offered, review incoming passenger join requests, and track your booked carpools.</p>
+    </div>
+  </div>
+
+  <div class="container" style="margin-bottom: 70px;">
+    <!-- Tabs Navigation -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" id="tab-posted-btn" onclick="switchTab('posted')">
+        <span>🚘 Rides I Offered (Driver)</span>
+        <span class="requests-badge-count" id="badge-offered-count">0</span>
+      </button>
+
+      <button class="tab-btn" id="tab-requested-btn" onclick="switchTab('requested')">
+        <span>🎫 Rides I Requested (Passenger)</span>
+        <span class="requests-badge-count" id="badge-requested-count" style="background: var(--bup-blue);">0</span>
+      </button>
+    </div>
+
+    <!-- Tab 1: Offered Rides (Driver View) -->
+    <div id="panel-posted" class="tab-panel">
+      <!-- Driver Carpool Earnings & Summary Strip (Pathao / Uber Inspired) -->
+      <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; box-shadow: var(--shadow-sm);">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">💰 Fuel Cost Shared / Saved</span>
+          <h3 style="font-size: 1.6rem; color: var(--bup-primary); font-weight: 800; margin-top: 2px;" id="driver-total-earnings">৳ 0</h3>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">👥 Co-Passengers Transported</span>
+          <h3 style="font-size: 1.6rem; color: var(--bup-gold); font-weight: 800; margin-top: 2px;" id="driver-total-passengers">0</h3>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🌱 Campus Carbon Saved</span>
+          <h3 style="font-size: 1.6rem; color: #16a34a; font-weight: 800; margin-top: 2px;" id="driver-carbon-saved">0 kg</h3>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">⭐ Your Driver Rating</span>
+          <h3 style="font-size: 1.6rem; color: #f59e0b; font-weight: 800; margin-top: 2px;">5.0 <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">(Top Rated)</span></h3>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="font-size: 1.2rem; font-weight: 700;">My Ride Listings</h3>
+        <a href="offer-ride.html" class="btn btn-primary btn-sm">+ Offer Another Ride</a>
+      </div>
+
+      <div class="rides-list-container" id="posted-rides-list">
+        <!-- Dynamically rendered -->
+        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+          Loading your offered rides...
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Requested Rides (Passenger View) -->
+    <div id="panel-requested" class="tab-panel" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="font-size: 1.2rem; font-weight: 700;">My Ride Requests</h3>
+        <a href="find-ride.html" class="btn btn-secondary btn-sm">Find More Rides</a>
+      </div>
+
+      <div class="rides-list-container" id="requested-rides-list">
+        <!-- Dynamically rendered -->
+        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+          Loading your ride requests...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Mount -->
+  <div id="footer-mount"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/my-rides.js"></script>
+</body>
+</html>

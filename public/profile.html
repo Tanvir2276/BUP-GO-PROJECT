@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile - BUPGO Carpool</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <!-- Header Mount -->
+  <div id="navbar-mount"></div>
+
+  <!-- Page Header Band -->
+  <div class="page-header-band">
+    <div class="container">
+      <h1 class="page-header-title">Student Profile & Verification</h1>
+      <p class="page-header-sub">Your verified BUP identity, carpool statistics, and personal transportation preferences.</p>
+    </div>
+  </div>
+
+  <div class="container" style="max-width: 860px; margin-bottom: 70px;">
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="profile-header-grid">
+        <img id="prof-avatar" src="" alt="Avatar" class="profile-avatar-lg">
+        <div class="profile-header-details">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <h2 id="prof-name">Student Name</h2>
+            <span class="badge badge-green" id="prof-role-badge">Verified Student</span>
+          </div>
+          <p id="prof-sub">Department of Information & Communication Technology (ICT)</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;" id="prof-email">student@bup.edu.bd</p>
+        </div>
+      </div>
+
+      <!-- Info Details Grid -->
+      <div class="profile-info-grid">
+        <div class="profile-info-item">
+          <label>Student ID</label>
+          <span id="prof-id">--</span>
+        </div>
+        <div class="profile-info-item">
+          <label>Department</label>
+          <span id="prof-dept">--</span>
+        </div>
+        <div class="profile-info-item">
+          <label>Batch / Session</label>
+          <span id="prof-batch">--</span>
+        </div>
+        <div class="profile-info-item">
+          <label>Contact Phone</label>
+          <span id="prof-phone">--</span>
+        </div>
+        <div class="profile-info-item">
+          <label>Primary Role</label>
+          <span id="prof-role">--</span>
+        </div>
+        <div class="profile-info-item">
+          <label>Vehicle Model</label>
+          <span id="prof-vehicle">--</span>
+        </div>
+      </div>
+
+      <!-- Bio / Note -->
+      <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+        <label style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 6px;">
+          Student Bio & Commute Notes
+        </label>
+        <p id="prof-bio" style="font-size: 0.95rem; color: var(--text-main); font-style: italic;">
+          --
+        </p>
+      </div>
+
+      <!-- Carpooling Activity Badges -->
+      <div style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <span class="badge badge-blue" id="prof-rides-offered-badge">🚘 Rides Offered: 0</span>
+        <span class="badge badge-purple" id="prof-rides-taken-badge">🎫 Bookings Made: 0</span>
+        <span class="badge badge-green">🛡️ BUP ID Verified</span>
+      </div>
+    </div>
+
+    <!-- Edit Profile Card -->
+    <div class="offer-card">
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;">Update Profile Information</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Keep your phone number and commute preferences up to date.</p>
+
+      <form id="profile-edit-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="edit-phone" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vehicle Model (If Driver)</label>
+            <input type="text" id="edit-vehicle" class="form-control" placeholder="e.g. Toyota Axio / Yamaha FZ">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bio / Commuting Routine</label>
+          <textarea id="edit-bio" class="form-control" placeholder="e.g. Regular commuter from Mirpur 10. Always punctual for morning classes."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btn-save-profile">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer Mount -->
+  <div id="footer-mount"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>
