@@ -188,6 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const estimatedCost = document.getElementById('offer-cost').value;
       const additionalInfo = document.getElementById('offer-info').value.trim();
 
+      const directionRadio = document.querySelector('input[name="offer-direction"]:checked');
+      const tripType = directionRadio ? directionRadio.value : (startingLocation.toLowerCase().includes('bup') ? 'return' : 'to_campus');
+
       submitBtn.disabled = true;
       submitBtn.textContent = 'Posting Ride to NoSQL Database...';
 
@@ -203,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             availableSeats,
             vehicleModel,
             estimatedCost,
+            tripType,
             additionalInfo
           })
         });

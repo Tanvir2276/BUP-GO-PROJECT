@@ -140,7 +140,11 @@ async function loadRides() {
     currentRides = data.rides || [];
 
     if (countHeading) {
-      countHeading.textContent = `${currentRides.length} Available Ride${currentRides.length === 1 ? '' : 's'}`;
+      if (data.fallbackToRoute) {
+        countHeading.innerHTML = `${currentRides.length} Available Ride${currentRides.length === 1 ? '' : 's'} <span style="font-size: 0.82rem; font-weight: 500; color: var(--bup-primary); margin-left: 8px;">(Showing upcoming dates for this route)</span>`;
+      } else {
+        countHeading.textContent = `${currentRides.length} Available Ride${currentRides.length === 1 ? '' : 's'}`;
+      }
     }
 
     if (currentRides.length === 0) {

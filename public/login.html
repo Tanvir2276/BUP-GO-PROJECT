@@ -106,37 +106,63 @@
 
       <!-- Quick 1-Click Demo Accounts for Evaluators / Defense -->
       <div class="quick-demo-accounts">
-        <h4>⚡ Quick 1-Click Demo Accounts (For Lab Testing)</h4>
+        <h4>⚡ Quick 1-Click Demo Accounts (Drivers, Passenger & Admin)</h4>
         <div class="demo-pills" id="demo-users-pills">
-          <!-- Dynamically loaded from /api/auth/quick-users -->
+          <!-- All Registered Drivers -->
+          <button type="button" class="demo-pill-btn" onclick="quickLogin('2254901091', 'bup12345')">
+            <div>
+              <strong>🚗 jabenNakimama (Driver)</strong>
+              <span>ID: 2254901091 • ICT (ICE) • Toyota Premio (Mirpur / ECB)</span>
+            </div>
+            <span class="badge badge-green">Click to Login</span>
+          </button>
+
+          <button type="button" class="demo-pill-btn" onclick="quickLogin('2254901092', 'bup12345')">
+            <div>
+              <strong>🚗 choloBUP (Driver)</strong>
+              <span>ID: 2254901092 • Dept: CSE • Honda Grace Hybrid (Uttara / Airport)</span>
+            </div>
+            <span class="badge badge-green">Click to Login</span>
+          </button>
+
+          <button type="button" class="demo-pill-btn" onclick="quickLogin('2254901093', 'bup12345')">
+            <div>
+              <strong>🚗 AmiBasayJabo (Driver)</strong>
+              <span>ID: 2254901093 • Dept: BBA • Suzuki Swift (Dhanmondi / Farmgate)</span>
+            </div>
+            <span class="badge badge-green">Click to Login</span>
+          </button>
+
           <button type="button" class="demo-pill-btn" onclick="quickLogin('2254901076', 'bup12345')">
             <div>
-              <strong>Munshi Tanvir Hossain (Driver)</strong>
-              <span>ID: 2254901076 • Dept: ICT • Toyota Axio</span>
+              <strong>🚗 Munshi Tanvir Hossain (Driver)</strong>
+              <span>ID: 2254901076 • Dept: ICT (ICE) • Toyota Axio (Mirpur 10)</span>
             </div>
             <span class="badge badge-green">Click to Login</span>
           </button>
 
           <button type="button" class="demo-pill-btn" onclick="quickLogin('2354900901014', 'bup12345')">
             <div>
-              <strong>Sulayman Akhand Rahul (Driver)</strong>
-              <span>ID: 2354900901014 • Dept: ICT • Motorbike</span>
+              <strong>🏍️ Sulayman Akhand Rahul (Driver)</strong>
+              <span>ID: 2354900901014 • Dept: ICT (ICE) • Yamaha FZS V3 Motorbike</span>
             </div>
             <span class="badge badge-green">Click to Login</span>
           </button>
 
+          <!-- Passenger -->
           <button type="button" class="demo-pill-btn" onclick="quickLogin('2254901045', 'bup12345')">
             <div>
-              <strong>Fatima Zahra (Passenger)</strong>
-              <span>ID: 2254901045 • Dept: CSE • Mirpur Commute</span>
+              <strong>🎒 Fatima Zahra (Passenger)</strong>
+              <span>ID: 2254901045 • Dept: CSE • Daily Commuter</span>
             </div>
             <span class="badge badge-blue">Click to Login</span>
           </button>
 
+          <!-- System Administrator -->
           <button type="button" class="demo-pill-btn" onclick="quickLogin('admin@bup.edu.bd', 'admin123')">
             <div>
-              <strong>System Administrator</strong>
-              <span>admin@bup.edu.bd • ICT Lab Admin</span>
+              <strong>🛡️ System Administrator (Admin)</strong>
+              <span>admin@bup.edu.bd • Central Platform Admin</span>
             </div>
             <span class="badge badge-purple">Click to Login</span>
           </button>

@@ -251,6 +251,32 @@ app.post('/api/auth/change-password', authenticateToken, async (req, res) => {
    RIDES API
    ========================================================= */
 
+// Smart Location Query Resolver for Dhaka & BUP Hotspots
+function buildSmartLocationRegex(queryStr) {
+  if (!queryStr || !queryStr.trim()) return null;
+  const raw = queryStr.trim().toLowerCase();
+
+  // If query refers to BUP campus (bup, campus, cantonment, mirpur cant)
+  if (raw.includes('bup') || raw.includes('campus') || raw.includes('cantonment')) {
+    return { $regex: 'bup|campus|cantonment', $options: 'i' };
+  }
+
+  // Tokenize location query into meaningful search keywords
+  const stopWords = new Set(['the', 'and', 'for', 'road', 'sector', 'block', 'gate', 'circle', 'mor', 'chattar', 'bus', 'stand', 'station', 'metro', 'plaza', 'building', 'area']);
+  const cleanTokens = raw
+    .replace(/[^\w\s]/gi, ' ')
+    .split(/\s+/)
+    .filter(t => t.length >= 2 && !stopWords.has(t));
+
+  if (cleanTokens.length === 0) {
+    const escaped = queryStr.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return { $regex: escaped, $options: 'i' };
+  }
+
+  const escapedTokens = cleanTokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return { $regex: escapedTokens.join('|'), $options: 'i' };
+}
+
 // Get Rides with Search and Filters
 app.get('/api/rides', optionalAuth, async (req, res) => {
   try {
@@ -264,19 +290,29 @@ app.get('/api/rides', optionalAuth, async (req, res) => {
     }
 
     if (tripType && tripType !== 'all') {
-      filter.tripType = tripType;
+      if (tripType === 'to_campus' || tripType === 'to_bup') {
+        filter.tripType = { $in: ['to_campus', 'to_bup'] };
+      } else if (tripType === 'return' || tripType === 'from_bup') {
+        filter.tripType = { $in: ['return', 'from_bup'] };
+      } else {
+        filter.tripType = tripType;
+      }
     }
 
     if (start && start.trim()) {
-      filter.startingLocation = { $regex: start.trim(), $options: 'i' };
+      const reg = buildSmartLocationRegex(start);
+      if (reg) filter.startingLocation = reg;
     }
 
     if (destination && destination.trim()) {
-      filter.destination = { $regex: destination.trim(), $options: 'i' };
+      const reg = buildSmartLocationRegex(destination);
+      if (reg) filter.destination = reg;
     }
 
+    let dateFiltered = false;
     if (date && date.trim()) {
       filter.travelDate = date.trim();
+      dateFiltered = true;
     }
 
     if (vehicle && vehicle !== 'All') {
@@ -284,6 +320,18 @@ app.get('/api/rides', optionalAuth, async (req, res) => {
     }
 
     let rides = await Rides.find(filter);
+
+    // If a specific date returned 0 rides, fallback to show active rides on the same route!
+    let fallbackToRoute = false;
+    if (rides.length === 0 && dateFiltered) {
+      const fallbackFilter = { ...filter };
+      delete fallbackFilter.travelDate;
+      const routeRides = await Rides.find(fallbackFilter);
+      if (routeRides.length > 0) {
+        rides = routeRides;
+        fallbackToRoute = true;
+      }
+    }
 
     // Filter available seats if specified
     if (minSeats) {
@@ -295,7 +343,7 @@ app.get('/api/rides', optionalAuth, async (req, res) => {
     if (sortBy === 'lowest_fare') {
       rides.sort((a, b) => Number(a.estimatedCost || 0) - Number(b.estimatedCost || 0));
     } else if (sortBy === 'time') {
-      rides.sort((a, b) => new Date(a.travelDate + ' ' + a.departureTime) - new Date(b.travelDate + ' ' + b.departureTime));
+      rides.sort((a, b) => new Date((a.travelDate || '2026-10-25') + ' ' + (a.departureTime || '08:00 AM')) - new Date((b.travelDate || '2026-10-25') + ' ' + (b.departureTime || '08:00 AM')));
     } else {
       // Default: Top rated drivers first (highest rating -> most reviews)
       rides.sort((a, b) => {
@@ -306,7 +354,7 @@ app.get('/api/rides', optionalAuth, async (req, res) => {
       });
     }
 
-    res.json({ success: true, count: rides.length, rides });
+    res.json({ success: true, count: rides.length, fallbackToRoute, rides });
   } catch (err) {
     console.error('Error fetching rides:', err);
     res.status(500).json({ success: false, message: err.message });

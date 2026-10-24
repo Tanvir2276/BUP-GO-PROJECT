@@ -76,11 +76,11 @@ function quickFill(location) {
 document.addEventListener('DOMContentLoaded', async () => {
   renderChips('to_bup');
 
-  // Set default date to today
+  // Date input defaults to optional (any upcoming date) unless specified
   const dateInput = document.getElementById('search-date');
   if (dateInput) {
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.value = today;
+    // Keep placeholder or empty so passenger finds all active rides across dates
+    dateInput.value = '';
   }
 
   // Handle hero search form submit

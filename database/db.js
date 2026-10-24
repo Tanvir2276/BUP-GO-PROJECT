@@ -409,7 +409,13 @@ class DualCollection {
       }
       const created = await this.model.create(payload);
       const plain = created.toObject ? created.toObject() : created;
-      return normalizeDoc(plain);
+      const normalized = normalizeDoc(plain);
+      try {
+        await this.jsonCol.create({ ...normalized });
+      } catch (e) {
+        // Safe ignore
+      }
+      return normalized;
     }
     return await this.jsonCol.create(doc);
   }
@@ -424,12 +430,17 @@ class DualCollection {
         return p;
       });
       const inserted = await this.model.insertMany(payloads);
-      return inserted.map(d => normalizeDoc(d.toObject ? d.toObject() : d));
+      const normalized = inserted.map(d => normalizeDoc(d.toObject ? d.toObject() : d));
+      try {
+        await this.jsonCol.insertMany(normalized);
+      } catch (e) {}
+      return normalized;
     }
     return await this.jsonCol.insertMany(docs);
   }
 
   async findByIdAndUpdate(id, update = {}, options = {}) {
+    let result = null;
     if (this.isMongo) {
       const updatePayload = update.$set ? update : { $set: update };
       const opts = { returnDocument: 'after', ...options };
@@ -440,12 +451,17 @@ class DualCollection {
       if (!updated) {
         updated = await this.model.findOneAndUpdate({ _id: String(id) }, updatePayload, opts).lean();
       }
-      return normalizeDoc(updated);
+      result = normalizeDoc(updated);
     }
-    return await this.jsonCol.findByIdAndUpdate(id, update, options);
+    try {
+      const jsonRes = await this.jsonCol.findByIdAndUpdate(id, update, options);
+      if (!result) result = jsonRes;
+    } catch (e) {}
+    return result;
   }
 
   async findByIdAndDelete(id) {
+    let result = null;
     if (this.isMongo) {
       let deleted = null;
       if (mongoose.Types.ObjectId.isValid(id)) {
@@ -454,9 +470,13 @@ class DualCollection {
       if (!deleted) {
         deleted = await this.model.findOneAndDelete({ _id: String(id) }).lean();
       }
-      return normalizeDoc(deleted);
+      result = normalizeDoc(deleted);
     }
-    return await this.jsonCol.findByIdAndDelete(id);
+    try {
+      const jsonDel = await this.jsonCol.findByIdAndDelete(id);
+      if (!result) result = jsonDel;
+    } catch (e) {}
+    return result;
   }
 
   async deleteOne(filter) {
