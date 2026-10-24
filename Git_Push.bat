@@ -1,31 +1,29 @@
 @echo off
-title BUPGO - Git Push to GitHub
+title BUPGO - Git Push to GitHub (Tanvir2276/BUP-GO-PROJECT)
 cd /d "%~dp0"
 echo ====================================================
-echo    BUPGO Git Push Utility
+echo    BUPGO Git Push Utility for Tanvir2276
 echo ====================================================
 echo.
-git remote -v | findstr origin >nul
-if errorlevel 1 (
-    echo [!] GitHub remote link not set yet.
-    echo Please paste your GitHub Repository URL (e.g. https://github.com/yourname/bupgo.git):
-    set /p REPO_URL="Repository URL: "
-    git remote add origin "%REPO_URL%"
-)
+echo Target Repository: https://github.com/Tanvir2276/BUP-GO-PROJECT
 echo.
-echo Committing latest updates...
+echo Committing any pending updates...
 git add .
-git commit -m "Update BUPGO project files" >nul 2>&1
+git commit -m "Update BUPGO full-stack platform with Vercel and mobile support" >nul 2>&1
 echo.
-echo Pushing to GitHub...
-git push -u origin main
+echo Pushing to GitHub (main branch)...
+echo (If a browser login window opens, please sign in as Tanvir2276)
+echo.
+git push -u origin main --force
+echo.
 if errorlevel 1 (
-    echo.
-    echo Standard push rejected (remote contains files). Syncing with force push...
-    git push -u origin main --force
+    echo [!] Push encountered an issue.
+    echo If permission was denied, ensure you are logged into GitHub as Tanvir2276.
+) else (
+    echo ====================================================
+    echo    SUCCESS! All files pushed to Tanvir2276/BUP-GO-PROJECT!
+    echo    Vercel will now automatically re-deploy your project.
+    echo ====================================================
 )
 echo.
-echo ====================================================
-echo    All files pushed to GitHub successfully!
-echo ====================================================
 pause
