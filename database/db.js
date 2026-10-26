@@ -110,7 +110,18 @@ const NotificationSchema = new mongoose.Schema({
   title: { type: String, required: true },
   message: { type: String, required: true },
   rideId: { type: mongoose.Schema.Types.Mixed, default: '' },
-  read: { type: Boolean, default: false }
+  read: { type: Boolean, default: false },
+  readBy: { type: [String], default: [] }
+}, { timestamps: true, strict: false });
+
+const ReviewSchema = new mongoose.Schema({
+  rideId: { type: mongoose.Schema.Types.Mixed, required: true, index: true },
+  reviewerId: { type: mongoose.Schema.Types.Mixed, required: true, index: true },
+  reviewerName: { type: String, required: true },
+  targetUserId: { type: mongoose.Schema.Types.Mixed, required: true, index: true },
+  targetRole: { type: String, default: 'driver' },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  comment: { type: String, default: '' }
 }, { timestamps: true, strict: false });
 
 const FareConfigSchema = new mongoose.Schema({
@@ -129,6 +140,7 @@ const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
 const RideModel = mongoose.models.Ride || mongoose.model('Ride', RideSchema);
 const RequestModel = mongoose.models.Request || mongoose.model('Request', RequestSchema);
 const NotificationModel = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);
+const ReviewModel = mongoose.models.Review || mongoose.model('Review', ReviewSchema);
 const FareConfigModel = mongoose.models.FareConfig || mongoose.model('FareConfig', FareConfigSchema);
 
 // Normalize document to ensure consistent string _id and field compatibility
@@ -501,6 +513,7 @@ const rawUsersJson = new NoSQLCollection('users');
 const rawRidesJson = new NoSQLCollection('rides');
 const rawRequestsJson = new NoSQLCollection('requests');
 const rawNotificationsJson = new NoSQLCollection('notifications');
+const rawReviewsJson = new NoSQLCollection('reviews');
 const rawFareConfigsJson = new NoSQLCollection('fare_configs');
 
 // Dual-mode exported collections
@@ -508,6 +521,7 @@ const Users = new DualCollection('users', UserModel, rawUsersJson);
 const Rides = new DualCollection('rides', RideModel, rawRidesJson);
 const Requests = new DualCollection('requests', RequestModel, rawRequestsJson);
 const Notifications = new DualCollection('notifications', NotificationModel, rawNotificationsJson);
+const Reviews = new DualCollection('reviews', ReviewModel, rawReviewsJson);
 const FareConfigs = new DualCollection('fare_configs', FareConfigModel, rawFareConfigsJson);
 
 /* =========================================================
@@ -649,10 +663,12 @@ module.exports = {
   Rides,
   Requests,
   Notifications,
+  Reviews,
   FareConfigs,
   UserModel,
   RideModel,
   RequestModel,
   NotificationModel,
+  ReviewModel,
   FareConfigModel
 };

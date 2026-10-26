@@ -5,7 +5,7 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const { initDatabase, getDbStatus, Users, Rides, Requests, Notifications, FareConfigs } = require('./database/db');
+const { initDatabase, getDbStatus, Users, Rides, Requests, Notifications, Reviews, FareConfigs } = require('./database/db');
 const { seedData } = require('./database/seed');
 const {
   normalizeVehicleType,
@@ -338,20 +338,23 @@ app.get('/api/rides', optionalAuth, async (req, res) => {
       rides = rides.filter(r => Number(r.availableSeats) >= Number(minSeats));
     }
 
-    // User requirement: "find ride a top rated gula age thakbe" (Top rated rides first)
-    const sortBy = sort || 'top_rated';
+    // Requirement 8: "newly posted rides gula age ashbe, chaile rider ke rating dite parbo & ei rating wise top priority te ashbe"
+    const sortBy = sort || 'newest';
     if (sortBy === 'lowest_fare') {
       rides.sort((a, b) => Number(a.estimatedCost || 0) - Number(b.estimatedCost || 0));
     } else if (sortBy === 'time') {
       rides.sort((a, b) => new Date((a.travelDate || '2026-10-25') + ' ' + (a.departureTime || '08:00 AM')) - new Date((b.travelDate || '2026-10-25') + ' ' + (b.departureTime || '08:00 AM')));
-    } else {
-      // Default: Top rated drivers first (highest rating -> most reviews)
+    } else if (sortBy === 'top_rated') {
+      // Top rated drivers first (highest rating -> most reviews)
       rides.sort((a, b) => {
         const ratingA = Number(a.driverRating !== undefined ? a.driverRating : 4.8);
         const ratingB = Number(b.driverRating !== undefined ? b.driverRating : 4.8);
         if (ratingB !== ratingA) return ratingB - ratingA;
         return (Number(b.driverReviews || 0) - Number(a.driverReviews || 0));
       });
+    } else {
+      // Default: 'newest' (Newly posted rides first)
+      rides.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     }
 
     res.json({ success: true, count: rides.length, fallbackToRoute, rides });
@@ -941,14 +944,13 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-// Notifications API (User-specific + General announcements)
+// Notifications API (User-specific + General announcements with Unread Count & Seen Status)
 app.get('/api/notifications', optionalAuth, async (req, res) => {
   try {
     const userId = req.user ? String(req.user.id) : null;
     let filter = {};
 
     if (userId) {
-      // User-specific notifications for this account + general announcements
       filter = {
         $or: [
           { recipientId: userId },
@@ -958,7 +960,6 @@ app.get('/api/notifications', optionalAuth, async (req, res) => {
         ]
       };
     } else {
-      // Guest users see general announcements only
       filter = {
         $or: [
           { recipientId: 'all' },
@@ -969,7 +970,198 @@ app.get('/api/notifications', optionalAuth, async (req, res) => {
 
     const list = await Notifications.find(filter);
     list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    res.json({ success: true, count: list.length, notifications: list.slice(0, 30) });
+
+    let unreadCount = 0;
+    const formatted = list.slice(0, 40).map(n => {
+      let isRead = false;
+      if (userId) {
+        if (n.recipientId === userId || n.targetUserId === userId) {
+          isRead = Boolean(n.read);
+        } else {
+          const readBy = Array.isArray(n.readBy) ? n.readBy : [];
+          isRead = readBy.includes(userId);
+        }
+      }
+      if (!isRead) unreadCount++;
+      return {
+        ...n,
+        isRead
+      };
+    });
+
+    res.json({
+      success: true,
+      count: list.length,
+      unreadCount: userId ? unreadCount : 0,
+      notifications: formatted
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Mark single notification as read (Requirement 2 & 11)
+app.put('/api/notifications/:id/read', optionalAuth, async (req, res) => {
+  try {
+    const notifId = req.params.id;
+    const userId = req.user ? String(req.user.id) : (req.body.userId || 'guest');
+    const notif = await Notifications.findById(notifId);
+    if (!notif) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
+
+    if (notif.recipientId === userId || notif.targetUserId === userId) {
+      await Notifications.findByIdAndUpdate(notifId, { read: true });
+    } else {
+      const readBy = Array.isArray(notif.readBy) ? [...notif.readBy] : [];
+      if (!readBy.includes(userId)) {
+        readBy.push(userId);
+        await Notifications.findByIdAndUpdate(notifId, { readBy });
+      }
+    }
+
+    res.json({ success: true, message: 'Notification marked as read' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Also support POST for clients that prefer POST
+app.post('/api/notifications/:id/read', optionalAuth, async (req, res) => {
+  try {
+    const notifId = req.params.id;
+    const userId = req.user ? String(req.user.id) : (req.body.userId || 'guest');
+    const notif = await Notifications.findById(notifId);
+    if (!notif) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
+
+    if (notif.recipientId === userId || notif.targetUserId === userId) {
+      await Notifications.findByIdAndUpdate(notifId, { read: true });
+    } else {
+      const readBy = Array.isArray(notif.readBy) ? [...notif.readBy] : [];
+      if (!readBy.includes(userId)) {
+        readBy.push(userId);
+        await Notifications.findByIdAndUpdate(notifId, { readBy });
+      }
+    }
+
+    res.json({ success: true, message: 'Notification marked as read' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Mark all notifications as read
+app.put('/api/notifications/mark-all-read', optionalAuth, async (req, res) => {
+  try {
+    const userId = req.user ? String(req.user.id) : (req.body.userId || 'guest');
+    const all = await Notifications.find({
+      $or: [
+        { recipientId: userId },
+        { targetUserId: userId },
+        { recipientId: 'all' },
+        { recipientId: { $exists: false } }
+      ]
+    });
+
+    for (const n of all) {
+      if (n.recipientId === userId || n.targetUserId === userId) {
+        await Notifications.findByIdAndUpdate(n._id, { read: true });
+      } else {
+        const readBy = Array.isArray(n.readBy) ? [...n.readBy] : [];
+        if (!readBy.includes(userId)) {
+          readBy.push(userId);
+          await Notifications.findByIdAndUpdate(n._id, { readBy });
+        }
+      }
+    }
+
+    res.json({ success: true, message: 'All notifications marked as read', unreadCount: 0 });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Save notification preferences (ON, SNOOZE, OFF)
+app.put('/api/notifications/preferences', authenticateToken, async (req, res) => {
+  try {
+    const { status, snoozedUntil } = req.body; // status: 'on' | 'off' | 'snooze'
+    const updated = await Users.findByIdAndUpdate(req.user.id, {
+      notificationSettings: {
+        status: status || 'on',
+        snoozedUntil: snoozedUntil || null,
+        updatedAt: new Date().toISOString()
+      }
+    });
+
+    res.json({ success: true, message: 'Notification preferences updated', settings: updated.notificationSettings });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Submit review & rating for Rider or Driver (Requirement 8)
+app.post('/api/reviews', authenticateToken, async (req, res) => {
+  try {
+    const { rideId, targetUserId, targetRole, rating, comment } = req.body;
+    if (!targetUserId || !rating) {
+      return res.status(400).json({ success: false, message: 'Target user and rating (1-5) are required.' });
+    }
+
+    const numRating = Math.max(1, Math.min(5, Number(rating) || 5));
+    const reviewer = await Users.findById(req.user.id);
+    if (!reviewer) return res.status(404).json({ success: false, message: 'Reviewer profile not found.' });
+
+    const newReview = await Reviews.create({
+      rideId: rideId || 'general',
+      reviewerId: reviewer._id,
+      reviewerName: reviewer.name,
+      targetUserId: String(targetUserId),
+      targetRole: targetRole || 'driver',
+      rating: numRating,
+      comment: comment ? String(comment).trim() : ''
+    });
+
+    // Recalculate target user's rating & reviews
+    const userReviews = await Reviews.find({ targetUserId: String(targetUserId) });
+    const totalScore = userReviews.reduce((sum, r) => sum + Number(r.rating || 5), 0);
+    const avgRating = Number((totalScore / (userReviews.length || 1)).toFixed(1));
+    const totalCount = userReviews.length;
+
+    await Users.findByIdAndUpdate(targetUserId, {
+      rating: avgRating,
+      totalReviews: totalCount
+    });
+
+    // If a rideId is associated, update ride's driver rating too
+    if (rideId && rideId !== 'general') {
+      try {
+        await Rides.findByIdAndUpdate(rideId, {
+          driverRating: avgRating,
+          driverReviews: totalCount
+        });
+      } catch(e) {}
+    }
+
+    // Create glowing notification for the reviewed user
+    try {
+      await Notifications.create({
+        title: `⭐ New ${numRating}-Star Rating Received!`,
+        message: `${reviewer.name} gave you a ${numRating}★ rating: "${comment || 'Great co-commute!'}"`,
+        type: 'rating_received',
+        recipientId: String(targetUserId),
+        targetUserId: String(targetUserId)
+      });
+    } catch(e) {}
+
+    res.status(201).json({
+      success: true,
+      message: 'Rating and review submitted successfully!',
+      review: newReview,
+      newRating: avgRating,
+      totalReviews: totalCount
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

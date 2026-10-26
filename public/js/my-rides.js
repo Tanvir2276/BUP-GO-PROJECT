@@ -94,9 +94,17 @@ function renderPostedRides(rides, container) {
     const requests = ride.requests || [];
     const pendingRequests = requests.filter(r => r.status === 'pending');
     const acceptedRequests = requests.filter(r => r.status === 'accepted');
+    const hasPending = pendingRequests.length > 0;
 
     return `
-      <div class="ride-card">
+      <div class="ride-card ${hasPending ? 'glow-request-pulse' : ''}">
+        ${hasPending ? `
+          <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; color: #047857; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.84rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
+            <span>⚡ ${pendingRequests.length} New Passenger Request(s) Received! Please review & confirm below.</span>
+            <span class="badge badge-green" style="font-size: 0.75rem;">Action Needed</span>
+          </div>
+        ` : ''}
+
         <div class="ride-card-top">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -315,11 +323,18 @@ function renderRequestedRides(requestedList, container) {
           <span style="font-size: 0.8rem; color: var(--text-muted);">
             Requested on: ${new Date(req.createdAt).toLocaleDateString()}
           </span>
-          ${isPending ? `
-            <button class="btn btn-secondary btn-sm" onclick="cancelMyRequest('${req._id}')">
-              Cancel Request
-            </button>
-          ` : ''}
+          <div style="display: flex; gap: 8px;">
+            ${isAccepted ? `
+              <button class="btn btn-secondary btn-sm" onclick="openRatingModal('${ride._id}', '${ride.driverId}', '${ride.driverName}', 'driver')">
+                ⭐ Rate Driver
+              </button>
+            ` : ''}
+            ${isPending ? `
+              <button class="btn btn-secondary btn-sm" onclick="cancelMyRequest('${req._id}')">
+                Cancel Request
+              </button>
+            ` : ''}
+          </div>
         </div>
       </div>
     `;
@@ -383,10 +398,111 @@ async function updateRideTripStatus(rideId, status) {
   }
 }
 
-// Passenger rates driver
-function rateDriver(driverName) {
-  const stars = prompt(`Rate ${driverName} (1 to 5 stars):`, '5');
-  if (stars) {
-    showToast(`Thank you! You gave ${driverName} a ${stars}⭐ rating.`, 'success');
+// Universal Interactive Rating & Review Modal (Requirement 8)
+let currentRatingValue = 5;
+
+function openRatingModal(rideId, targetUserId, targetUserName, targetRole = 'driver') {
+  currentRatingValue = 5;
+  const existing = document.getElementById('bupgo-rating-modal');
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'bupgo-rating-modal';
+  backdrop.className = 'bupgo-calendar-modal-backdrop';
+
+  backdrop.innerHTML = `
+    <div class="bupgo-calendar-card" onclick="event.stopPropagation()" style="max-width: 400px;">
+      <div class="cal-card-header">
+        <div>
+          <h4>⭐ Rate ${targetRole === 'driver' ? 'Driver' : 'Passenger'}: ${targetUserName}</h4>
+          <div class="cal-header-sub">Help build campus trust & ride rankings</div>
+        </div>
+        <button class="cal-close-btn" onclick="closeRatingModal()">&times;</button>
+      </div>
+
+      <div style="padding: 20px 18px;">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Select Star Rating:</div>
+          <div id="star-rating-selector" style="font-size: 2rem; cursor: pointer; display: flex; justify-content: center; gap: 6px;">
+            <span onclick="setRatingStars(1)" data-star="1" style="color: #f59e0b;">★</span>
+            <span onclick="setRatingStars(2)" data-star="2" style="color: #f59e0b;">★</span>
+            <span onclick="setRatingStars(3)" data-star="3" style="color: #f59e0b;">★</span>
+            <span onclick="setRatingStars(4)" data-star="4" style="color: #f59e0b;">★</span>
+            <span onclick="setRatingStars(5)" data-star="5" style="color: #f59e0b;">★</span>
+          </div>
+          <div id="star-rating-label" style="font-size: 0.9rem; font-weight: 700; color: #f59e0b; margin-top: 4px;">5 Stars - Excellent Commute!</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="font-size: 0.82rem;">Review Feedback (Optional):</label>
+          <textarea id="rating-comment" class="form-control" rows="3" placeholder="Punctual departure, safe driving, clean car, friendly conversation..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeRatingModal()">Cancel</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-submit-rating" onclick="submitUserRating('${rideId}', '${targetUserId}', '${targetRole}')">Submit Rating</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  backdrop.addEventListener('click', closeRatingModal);
+  document.body.appendChild(backdrop);
+}
+
+function setRatingStars(val) {
+  currentRatingValue = val;
+  const stars = document.querySelectorAll('#star-rating-selector span');
+  stars.forEach((s, idx) => {
+    s.style.color = (idx < val) ? '#f59e0b' : '#cbd5e1';
+  });
+
+  const labelEl = document.getElementById('star-rating-label');
+  const labels = [
+    '',
+    '1 Star - Poor Experience',
+    '2 Stars - Below Average',
+    '3 Stars - Average Ride',
+    '4 Stars - Good & Safe Ride',
+    '5 Stars - Excellent Commute!'
+  ];
+  if (labelEl) labelEl.textContent = labels[val] || `${val} Stars`;
+}
+
+function closeRatingModal() {
+  const modal = document.getElementById('bupgo-rating-modal');
+  if (modal) modal.remove();
+}
+
+async function submitUserRating(rideId, targetUserId, targetRole) {
+  const submitBtn = document.getElementById('btn-submit-rating');
+  const comment = document.getElementById('rating-comment')?.value || '';
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+  }
+
+  try {
+    const res = await apiRequest('/reviews', {
+      method: 'POST',
+      body: JSON.stringify({
+        rideId,
+        targetUserId,
+        targetRole,
+        rating: currentRatingValue,
+        comment
+      })
+    });
+
+    showToast(res.message || 'Rating submitted successfully!', 'success');
+    closeRatingModal();
+    loadMyRides();
+  } catch (err) {
+    showToast(err.message || 'Could not submit rating', 'error');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Rating';
+    }
   }
 }

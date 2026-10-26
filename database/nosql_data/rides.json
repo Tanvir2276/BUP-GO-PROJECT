@@ -1,8 +1,57 @@
 [
   {
+    "_id": "6adf1802b81adaa40df4c041",
+    "createdAt": "2026-10-26T09:06:10.452Z",
+    "updatedAt": "2026-10-26T09:07:51.278Z",
+    "driverId": "4474a028e950f753e450ee3f",
+    "driverName": "Sulayman Akhand Rahul",
+    "driverStudentId": "2354900901014",
+    "driverDept": "ICT (ICE)",
+    "driverPhone": "01822334455",
+    "driverAvatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=300&q=80",
+    "driverRating": 5,
+    "driverReviews": 12,
+    "tripType": "return",
+    "startingLocation": "BUP Campus (Main Gate)",
+    "destination": "Uttara Azampur",
+    "travelDate": "2026-10-27",
+    "departureTime": "2:00 pm",
+    "totalSeats": 3,
+    "availableSeats": 2,
+    "transportationType": "Car",
+    "vehicleModel": "Yamaha FZS V3 (Dhaka Metro Ha 19-8765)",
+    "estimatedCost": 192,
+    "fareSnapshot": {
+      "vehicleType": "Car",
+      "vehicleDisplayName": "Personal Car",
+      "city": "nationwide",
+      "distanceKm": 7.1,
+      "waitingMinutes": 0,
+      "freeWaitingMinutes": 3,
+      "chargeableWaitingMinutes": 0,
+      "rates": {
+        "baseFare": 50,
+        "perKmRate": 20,
+        "waitingChargePerMin": 1.5
+      },
+      "breakdown": {
+        "baseFareFormatted": "৳50",
+        "distanceCostFormatted": "৳142",
+        "waitingCostFormatted": "৳0",
+        "formula": "৳50 (Base) + (7.1 km × ৳20) + (0 min chargeable × ৳1.5)"
+      },
+      "totalFare": 192,
+      "currency": "৳",
+      "calculatedAt": "2026-10-26T09:06:10.450Z"
+    },
+    "status": "completed",
+    "additionalInfo": "Commuting to/from BUP Campus.",
+    "__v": 0
+  },
+  {
     "_id": "c58001b631d5690124a6f95f",
     "createdAt": "2026-10-23T15:49:39.947Z",
-    "updatedAt": "2026-10-24T16:26:15.379Z",
+    "updatedAt": "2026-10-26T10:22:26.269Z",
     "driverId": "4474a028e950f753e450ee3f",
     "driverName": "Sulayman Akhand Rahul",
     "driverStudentId": "2354900901014",

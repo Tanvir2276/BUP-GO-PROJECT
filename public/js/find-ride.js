@@ -117,7 +117,7 @@ async function loadRides() {
   const date = document.getElementById('filter-date').value;
   const vehicle = document.getElementById('filter-vehicle').value;
   const seats = document.getElementById('filter-seats').value;
-  const sort = document.getElementById('filter-sort') ? document.getElementById('filter-sort').value : 'top_rated';
+  const sort = document.getElementById('filter-sort') ? document.getElementById('filter-sort').value : 'newest';
   const dir = document.getElementById('filter-direction') ? document.getElementById('filter-direction').value : 'all';
 
   const queryParams = new URLSearchParams();

@@ -68,8 +68,60 @@ function handleSignOut() {
   }, 500);
 }
 
-// Notification Drawer Toggle
+// Notification Drawer & Preference Management
 let notificationsOpen = false;
+let currentUnreadCount = 0;
+let lastKnownNotifIds = new Set();
+let notifPollInterval = null;
+
+// Get Notification Preference (ON, SNOOZE, OFF)
+function getNotificationPref() {
+  try {
+    const raw = localStorage.getItem('bupgo_notif_pref');
+    if (!raw) return { status: 'on', snoozedUntil: null };
+    const pref = JSON.parse(raw);
+    if (pref.status === 'snooze' && pref.snoozedUntil) {
+      if (Date.now() > pref.snoozedUntil) {
+        // Snooze expired, auto-resume
+        const resumed = { status: 'on', snoozedUntil: null };
+        localStorage.setItem('bupgo_notif_pref', JSON.stringify(resumed));
+        return resumed;
+      }
+    }
+    return pref;
+  } catch (e) {
+    return { status: 'on', snoozedUntil: null };
+  }
+}
+
+function setNotificationPref(status, durationHours = 0) {
+  let snoozedUntil = null;
+  if (status === 'snooze' && durationHours > 0) {
+    snoozedUntil = Date.now() + (durationHours * 3600 * 1000);
+  }
+
+  const pref = { status, snoozedUntil };
+  localStorage.setItem('bupgo_notif_pref', JSON.stringify(pref));
+
+  // Sync to backend if logged in
+  if (Auth.isLoggedIn()) {
+    apiRequest('/notifications/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(pref)
+    }).catch(() => {});
+  }
+
+  const msg = status === 'snooze' 
+    ? `Notifications snoozed for ${durationHours} hour(s) 🔕` 
+    : status === 'off' 
+      ? 'Notifications turned OFF 🔕' 
+      : 'Notifications turned ON 🔔';
+  showToast(msg, 'info');
+
+  renderNotifPrefBar();
+  updateBadgeDisplay();
+}
+
 async function toggleNotifications() {
   const panel = document.getElementById('notifications-panel');
   if (!panel) return;
@@ -78,33 +130,68 @@ async function toggleNotifications() {
   panel.style.display = notificationsOpen ? 'block' : 'none';
 
   if (notificationsOpen) {
+    renderNotifPrefBar();
     await loadNotifications();
   }
 }
 
-function updateBadgeCount(count) {
-  const badge = document.getElementById('notif-badge');
-  if (!badge) return;
-  if (count > 0) {
-    badge.textContent = count > 99 ? '99+' : String(count);
-    badge.style.display = 'inline-flex';
-  } else {
-    badge.style.display = 'none';
+function renderNotifPrefBar() {
+  const bar = document.getElementById('notif-pref-controls');
+  if (!bar) return;
+
+  const pref = getNotificationPref();
+  const isSnoozed = pref.status === 'snooze';
+  const isOff = pref.status === 'off';
+  const isOn = pref.status === 'on';
+
+  let remainingText = '';
+  if (isSnoozed && pref.snoozedUntil) {
+    const mins = Math.max(1, Math.round((pref.snoozedUntil - Date.now()) / 60000));
+    remainingText = `(${mins}m left)`;
   }
+
+  bar.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem; width: 100%;">
+      <span style="font-weight: 700; color: var(--text-muted);">Alert Status:</span>
+      <div style="display: flex; gap: 4px;">
+        <button type="button" class="notif-pref-pill ${isOn ? 'active' : ''}" onclick="setNotificationPref('on')" title="Receive all live alerts">🔔 ON</button>
+        <button type="button" class="notif-pref-pill ${isSnoozed ? 'active' : ''}" onclick="setNotificationPref('snooze', 1)" title="Snooze alerts for 1 hour">⏱️ Snooze 1h ${remainingText}</button>
+        <button type="button" class="notif-pref-pill ${isOff ? 'active' : ''}" onclick="setNotificationPref('off')" title="Turn off notifications">🔕 OFF</button>
+      </div>
+    </div>
+  `;
 }
 
-async function initNotificationBadge() {
-  const user = Auth.getUser();
-  if (!user) {
-    updateBadgeCount(0);
+function updateBadgeDisplay() {
+  const badge = document.getElementById('notif-badge');
+  const bell = document.getElementById('notif-bell-btn');
+  if (!badge) return;
+
+  const pref = getNotificationPref();
+  if (pref.status === 'off') {
+    badge.textContent = '✕';
+    badge.style.display = 'inline-flex';
+    badge.style.background = '#64748b';
+    if (bell) bell.classList.remove('glow-pulse-ring');
     return;
   }
-  try {
-    const res = await apiRequest('/notifications');
-    const count = (res.notifications || []).length;
-    updateBadgeCount(count);
-  } catch (e) {
-    updateBadgeCount(0);
+
+  if (pref.status === 'snooze') {
+    badge.textContent = '🔕';
+    badge.style.display = 'inline-flex';
+    badge.style.background = '#d97706';
+    if (bell) bell.classList.remove('glow-pulse-ring');
+    return;
+  }
+
+  if (currentUnreadCount > 0) {
+    badge.textContent = currentUnreadCount > 99 ? '99+' : String(currentUnreadCount);
+    badge.style.display = 'inline-flex';
+    badge.style.background = 'var(--bup-red, #dc2626)';
+    if (bell) bell.classList.add('glow-pulse-ring');
+  } else {
+    badge.style.display = 'none';
+    if (bell) bell.classList.remove('glow-pulse-ring');
   }
 }
 
@@ -122,25 +209,166 @@ async function loadNotifications() {
   try {
     const res = await apiRequest('/notifications');
     const notifs = res.notifications || [];
-    updateBadgeCount(notifs.length);
+    currentUnreadCount = res.unreadCount !== undefined ? res.unreadCount : 0;
+    updateBadgeDisplay();
+
+    // Track known IDs for live notification broadcasts
+    notifs.forEach(n => lastKnownNotifIds.add(n._id));
 
     if (notifs.length === 0) {
       listEl.innerHTML = `<div style="text-align:center; padding: 25px; color: var(--text-muted); font-size: 0.85rem;">No recent notifications</div>`;
       return;
     }
 
-    listEl.innerHTML = notifs.map(n => `
-      <div style="padding: 12px 14px; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 4px; transition: background 0.2s; cursor: pointer;" onmouseover="this.style.background='var(--bup-primary-soft)'" onmouseout="this.style.background='transparent'">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <strong style="font-size: 0.88rem; color: var(--bup-primary);">${n.title}</strong>
-          <span style="font-size: 0.72rem; color: var(--text-muted);">${formatNotifTime(n.createdAt)}</span>
+    listEl.innerHTML = notifs.map(n => {
+      const isUnread = !n.isRead;
+      const isRequest = n.type === 'seat_request';
+      const isConfirmed = n.type === 'request_status';
+      const isRidePost = n.type === 'ride_posted';
+
+      return `
+        <div class="notif-drawer-item ${isUnread ? 'unread' : 'read'} ${isRequest && isUnread ? 'glow-request-item' : ''}" 
+             id="notif-item-${n._id}"
+             onclick="handleNotifClick('${n._id}', ${isUnread}, '${n.type || 'general'}')">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              ${isUnread ? `<span class="notif-unread-dot" title="Unread">●</span>` : `<span class="notif-read-check">✓</span>`}
+              <strong class="notif-title-text">${n.title}</strong>
+              ${isUnread ? `<span class="badge ${isRequest ? 'badge-yellow' : 'badge-green'}" style="font-size: 0.68rem; padding: 1px 6px;">NEW</span>` : ''}
+            </div>
+            <span class="notif-time-text">${formatNotifTime(n.createdAt)}</span>
+          </div>
+
+          <p class="notif-message-text">${n.message}</p>
+
+          ${isRequest ? `
+            <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+              <a href="my-rides.html" class="btn btn-primary btn-sm" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 4px;">
+                ⚡ Review & Accept Request
+              </a>
+              <span style="font-size: 0.72rem; color: var(--bup-primary); font-weight: 600;">Passenger Waiting</span>
+            </div>
+          ` : ''}
+
+          ${isRidePost ? `
+            <div style="margin-top: 4px;">
+              <a href="find-ride.html" style="font-size: 0.74rem; font-weight: 700; color: var(--bup-primary);">
+                View Available Ride ➔
+              </a>
+            </div>
+          ` : ''}
         </div>
-        <p style="font-size: 0.82rem; color: var(--text-main); margin: 0; line-height: 1.4;">${n.message}</p>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   } catch (err) {
     listEl.innerHTML = `<div style="padding: 15px; color: var(--bup-red); font-size: 0.8rem; text-align:center;">Could not load alerts</div>`;
   }
+}
+
+// Mark single notification as read on click (Requirement 2 & 11)
+async function handleNotifClick(notifId, wasUnread, type) {
+  if (wasUnread) {
+    // Optimistically decrement count instantly in UI
+    currentUnreadCount = Math.max(0, currentUnreadCount - 1);
+    updateBadgeDisplay();
+
+    // Update item styling to read
+    const itemEl = document.getElementById(`notif-item-${notifId}`);
+    if (itemEl) {
+      itemEl.classList.remove('unread', 'glow-request-item');
+      itemEl.classList.add('read');
+      const dot = itemEl.querySelector('.notif-unread-dot');
+      if (dot) dot.outerHTML = `<span class="notif-read-check">✓</span>`;
+      const badge = itemEl.querySelector('.badge');
+      if (badge) badge.remove();
+    }
+
+    try {
+      await apiRequest(`/notifications/${notifId}/read`, { method: 'PUT' });
+    } catch (e) {
+      console.warn('Could not sync read status to server:', e.message);
+    }
+  }
+
+  // Navigate if relevant
+  if (type === 'seat_request') {
+    window.location.href = 'my-rides.html';
+  }
+}
+
+// Mark All Notifications as Read (Requirement 2)
+async function markAllNotificationsAsRead() {
+  currentUnreadCount = 0;
+  updateBadgeDisplay();
+
+  const items = document.querySelectorAll('.notif-drawer-item.unread');
+  items.forEach(el => {
+    el.classList.remove('unread', 'glow-request-item');
+    el.classList.add('read');
+    const dot = el.querySelector('.notif-unread-dot');
+    if (dot) dot.outerHTML = `<span class="notif-read-check">✓</span>`;
+    const badge = el.querySelector('.badge');
+    if (badge) badge.remove();
+  });
+
+  try {
+    await apiRequest('/notifications/mark-all-read', { method: 'PUT' });
+    showToast('All notifications marked as read', 'info');
+  } catch (e) {
+    console.warn('Error marking all as read:', e.message);
+  }
+}
+
+async function initNotificationBadge() {
+  const user = Auth.getUser();
+  if (!user) {
+    currentUnreadCount = 0;
+    updateBadgeDisplay();
+    return;
+  }
+  try {
+    const res = await apiRequest('/notifications');
+    currentUnreadCount = res.unreadCount !== undefined ? res.unreadCount : 0;
+    updateBadgeDisplay();
+
+    (res.notifications || []).forEach(n => lastKnownNotifIds.add(n._id));
+
+    // Start background poller if not already active
+    if (!notifPollInterval) {
+      notifPollInterval = setInterval(pollLiveNotifications, 25000);
+    }
+  } catch (e) {
+    currentUnreadCount = 0;
+    updateBadgeDisplay();
+  }
+}
+
+// Background polling for new ride alerts and seat requests (Requirement 7 & 9)
+async function pollLiveNotifications() {
+  if (!Auth.isLoggedIn()) return;
+  const pref = getNotificationPref();
+  if (pref.status === 'off' || pref.status === 'snooze') return;
+
+  try {
+    const res = await apiRequest('/notifications');
+    const notifs = res.notifications || [];
+    currentUnreadCount = res.unreadCount !== undefined ? res.unreadCount : 0;
+    updateBadgeDisplay();
+
+    // Check for brand new notifications
+    const newItems = notifs.filter(n => !lastKnownNotifIds.has(n._id));
+    if (newItems.length > 0) {
+      newItems.forEach(n => {
+        lastKnownNotifIds.add(n._id);
+        // Show glowing toast
+        if (n.type === 'seat_request') {
+          showToast(`⚡ ${n.title}: ${n.message}`, 'success');
+        } else if (n.type === 'ride_posted') {
+          showToast(`🚗 ${n.title}: ${n.message}`, 'info');
+        }
+      });
+    }
+  } catch (e) {}
 }
 
 // Render Universal Navbar
@@ -191,15 +419,31 @@ function renderNavbar() {
 
             <!-- Dropdown Notification Menu -->
             <div id="notifications-panel" class="notifications-dropdown">
-              <div style="padding: 12px 16px; background: var(--bup-primary); color: white; display: flex; justify-content: space-between; align-items: center;">
-                <strong style="font-size: 0.9rem;">🔔 Live BUP Carpool Alerts</strong>
-                <button onclick="toggleNotifications()" style="background: none; border: none; color: white; font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 0 4px;">&times;</button>
+              <div class="notif-dropdown-header">
+                <div>
+                  <strong style="font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                    🔔 Live Notifications
+                  </strong>
+                  <div style="font-size: 0.72rem; color: #a7f3d0; margin-top: 1px;">Real-time ride requests & campus alerts</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button type="button" class="btn-mark-all-read" onclick="markAllNotificationsAsRead()" title="Mark all as read">
+                    ✓ Read All
+                  </button>
+                  <button onclick="toggleNotifications()" style="background: none; border: none; color: white; font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 0 4px;">&times;</button>
+                </div>
               </div>
-              <div id="notif-items-list" style="max-height: 340px; overflow-y: auto;">
+
+              <!-- Alert Preferences Bar (ON / SNOOZE / OFF) -->
+              <div id="notif-pref-controls" class="notif-pref-bar"></div>
+
+              <div id="notif-items-list" class="notif-scroll-area">
                 <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem;">Loading alerts...</div>
               </div>
-              <div style="padding: 10px 14px; background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center;">
-                <a href="find-ride.html" style="font-size: 0.82rem; font-weight: 700; color: var(--bup-primary);">Browse All Active Rides →</a>
+
+              <div style="padding: 10px 14px; background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center; display: flex; justify-content: space-between; align-items: center;">
+                <a href="my-rides.html" style="font-size: 0.78rem; font-weight: 700; color: var(--bup-primary);">Manage My Rides →</a>
+                <a href="find-ride.html" style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Browse Rides →</a>
               </div>
             </div>
           </div>

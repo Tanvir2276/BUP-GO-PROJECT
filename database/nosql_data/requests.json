@@ -1,5 +1,45 @@
 [
   {
+    "_id": "6adf1846b81adaa40df4c043",
+    "createdAt": "2026-10-26T09:07:18.466Z",
+    "updatedAt": "2026-10-26T09:07:46.040Z",
+    "rideId": "6adf1802b81adaa40df4c041",
+    "riderId": "1928cde9857d68110315939e",
+    "riderName": "Fatima Zahra",
+    "riderStudentId": "2254901045",
+    "riderDept": "Computer Science & Engineering",
+    "riderPhone": "01655667788",
+    "seatsRequested": 1,
+    "pickupLocation": "BUP Campus (Main Gate)",
+    "notes": "",
+    "status": "accepted",
+    "fareSnapshot": {
+      "vehicleType": "Car",
+      "vehicleDisplayName": "Personal Car",
+      "city": "nationwide",
+      "distanceKm": 7.1,
+      "waitingMinutes": 0,
+      "freeWaitingMinutes": 3,
+      "chargeableWaitingMinutes": 0,
+      "rates": {
+        "baseFare": 50,
+        "perKmRate": 20,
+        "waitingChargePerMin": 1.5
+      },
+      "breakdown": {
+        "baseFareFormatted": "৳50",
+        "distanceCostFormatted": "৳142",
+        "waitingCostFormatted": "৳0",
+        "formula": "৳50 (Base) + (7.1 km × ৳20) + (0 min chargeable × ৳1.5)"
+      },
+      "totalFare": 192,
+      "currency": "৳",
+      "calculatedAt": "2026-10-26T09:06:10.450Z"
+    },
+    "totalEstimatedPrice": 192,
+    "__v": 0
+  },
+  {
     "_id": "03fb6238c32dddbd215b1e58",
     "createdAt": "2026-10-23T16:02:49.477Z",
     "updatedAt": "2026-10-23T16:02:49.477Z",

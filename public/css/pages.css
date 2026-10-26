@@ -1009,3 +1009,167 @@ body.dark-mode .page-header-band {
     gap: 15px;
   }
 }
+
+/* =========================================================
+   COMPREHENSIVE DARK MODE & CONTRAST STYLING FOR ALL PAGES
+   ========================================================= */
+body.dark-mode {
+  --bg-main: #0b1320;
+  --bg-card: #131f2f;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-light: #cbd5e1;
+  --border-color: #223554;
+}
+
+body.dark-mode .profile-card,
+body.dark-mode .settings-card,
+body.dark-mode .profile-sidebar-rail,
+body.dark-mode .profile-tabs-wrapper,
+body.dark-mode .admin-table-container,
+body.dark-mode .fare-config-card,
+body.dark-mode .calc-preview-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main);
+}
+
+body.dark-mode .settings-card-header,
+body.dark-mode .admin-table-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-mode .settings-card-title,
+body.dark-mode .profile-header-details h2,
+body.dark-mode .admin-table-header h3 {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .profile-info-item span {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .profile-info-item label {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .profile-tab-btn,
+body.dark-mode .profile-sidebar-btn {
+  color: #94a3b8;
+}
+
+body.dark-mode .profile-tab-btn:hover,
+body.dark-mode .profile-sidebar-btn:hover {
+  background: #1a2b40;
+  color: #34d399;
+}
+
+body.dark-mode .profile-tab-btn.active,
+body.dark-mode .profile-sidebar-btn.active {
+  background: #064e3b !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(6, 78, 59, 0.45);
+}
+
+body.dark-mode .data-table th {
+  background-color: #162436 !important;
+  color: #94a3b8 !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-mode .data-table td {
+  border-bottom-color: var(--border-color) !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .data-table tr:hover td {
+  background-color: #1a293d !important;
+}
+
+body.dark-mode .form-label {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .form-control {
+  background-color: #162436 !important;
+  border-color: #233752 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .form-control:focus {
+  border-color: #10b981 !important;
+  background-color: #1a2b40 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+}
+
+body.dark-mode .filter-sidebar {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .filter-sticky-footer {
+  background: var(--bg-card) !important;
+  border-top-color: var(--border-color) !important;
+}
+
+body.dark-mode .ride-card {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .route-point-label {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .route-point-name {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .fare-amount {
+  color: #34d399 !important;
+}
+
+body.dark-mode .meta-item strong {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .passenger-requests-box {
+  background-color: #0e1724 !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .request-item {
+  background-color: #162436 !important;
+  border-color: #233752 !important;
+}
+
+body.dark-mode .hero {
+  background: linear-gradient(180deg, #0f1c2d 0%, #0b1320 100%) !important;
+}
+
+body.dark-mode .hero h2 {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .hero p {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .hero-pill {
+  background: #162436 !important;
+  border-color: #233752 !important;
+  color: #34d399 !important;
+}
+
+body.dark-mode .stat-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .stat-number {
+  color: #34d399 !important;
+}
+
+body.dark-mode .stat-label {
+  color: #94a3b8 !important;
+}

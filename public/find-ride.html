@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=2.4">
   <link rel="stylesheet" href="css/pages.css?v=2.4">
+  <link rel="stylesheet" href="css/dateTimePickers.css">
+  <link rel="stylesheet" href="css/mapPicker.css">
 </head>
 <body>
   <!-- Header Mount -->
@@ -101,7 +103,8 @@
           <div style="display: flex; align-items: center; gap: 8px;">
             <label for="filter-sort" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Sort By:</label>
             <select id="filter-sort" class="form-control" style="width: auto; padding: 6px 12px; font-size: 0.85rem;" onchange="loadRides()">
-              <option value="top_rated" selected>⭐ Top Rated First</option>
+              <option value="newest" selected>🔥 Newly Posted First</option>
+              <option value="top_rated">⭐ Top Rated First</option>
               <option value="lowest_fare">💰 Lowest Fare</option>
               <option value="time">⏰ Departure Time</option>
             </select>
@@ -186,6 +189,8 @@
   <script src="js/api.js"></script>
   <script src="js/locations.js"></script>
   <script src="js/navbar.js"></script>
+  <script src="js/dateTimePickers.js"></script>
+  <script src="js/mapPicker.js"></script>
   <script src="js/find-ride.js"></script>
 </body>
 </html>

@@ -1,5 +1,44 @@
 [
   {
+    "_id": "6adf1862b81adaa40df4c045",
+    "createdAt": "2026-10-26T09:07:46.042Z",
+    "updatedAt": "2026-10-26T09:07:46.042Z",
+    "recipientId": "1928cde9857d68110315939e",
+    "targetUserId": "1928cde9857d68110315939e",
+    "type": "request_status",
+    "title": "🎉 Ride Confirmed!",
+    "message": "Your ride to Uttara Azampur has been confirmed by the driver! Driver contact is now unlocked.",
+    "rideId": "6adf1802b81adaa40df4c041",
+    "read": false,
+    "__v": 0
+  },
+  {
+    "_id": "6adf1846b81adaa40df4c044",
+    "createdAt": "2026-10-26T09:07:18.471Z",
+    "updatedAt": "2026-10-26T09:07:18.471Z",
+    "recipientId": "4474a028e950f753e450ee3f",
+    "targetUserId": "4474a028e950f753e450ee3f",
+    "type": "seat_request",
+    "title": "🎫 Seat Request Received",
+    "message": "Fatima Zahra (Computer Science & Engineering) requested 1 seat(s) on your ride to Uttara Azampur.",
+    "rideId": "6adf1802b81adaa40df4c041",
+    "read": false,
+    "__v": 0
+  },
+  {
+    "_id": "6adf1802b81adaa40df4c042",
+    "createdAt": "2026-10-26T09:06:10.482Z",
+    "updatedAt": "2026-10-26T09:06:10.482Z",
+    "recipientId": "all",
+    "targetUserId": "all",
+    "type": "ride_posted",
+    "title": "🚗 New Ride Alert!",
+    "message": "Sulayman Akhand Rahul posted a ride: BUP Campus (Main Gate) ➔ Uttara Azampur (2:00 pm) - ৳192/seat.",
+    "rideId": "6adf1802b81adaa40df4c041",
+    "read": false,
+    "__v": 0
+  },
+  {
     "_id": "notif_1",
     "createdAt": "2026-10-23T17:00:00.000Z",
     "title": "🚗 New Ride Available!",
