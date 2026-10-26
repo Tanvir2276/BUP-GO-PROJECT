@@ -1383,8 +1383,21 @@ body.dark-mode .data-table td {
 }
 
 body.dark-mode .stats-banner {
-  background-color: #101b27;
+  background-color: #0b1320;
   border-color: #1e3148;
+}
+
+body.dark-mode .stat-item h3 {
+  color: #34d399 !important;
+  text-shadow: 0 0 20px rgba(52, 211, 153, 0.45);
+}
+
+body.dark-mode .stat-item p {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .section-tag {
+  color: #34d399 !important;
 }
 
 body.dark-mode .page-header-band {

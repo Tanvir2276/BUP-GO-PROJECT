@@ -97,25 +97,27 @@ body.dark-mode .search-box-card {
 }
 
 .popular-routes-tags span {
-  font-weight: 600;
-  color: #cbd5e1;
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
 .route-tag-pill {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  padding: 4px 12px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .route-tag-pill:hover {
-  background: var(--bup-gold);
-  color: #ffffff;
-  border-color: var(--bup-gold);
+  background: var(--bup-primary-soft, #eef7f2);
+  color: var(--bup-primary, #00482b);
+  border-color: var(--bup-primary, #00482b);
 }
 
 /* Features Grid */
@@ -1170,6 +1172,100 @@ body.dark-mode .stat-number {
   color: #34d399 !important;
 }
 
+/* Trip Direction Selector Box (Light Mode Base) */
+.trip-direction-selector-box {
+  background: var(--bup-primary-soft, #eef7f2);
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 22px;
+  border: 1px solid rgba(0, 72, 43, 0.2);
+}
+
+.trip-direction-heading {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--bup-primary-dark, #00331e);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.trip-direction-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.92rem;
+  color: var(--bup-primary-dark, #00331e);
+}
+
+.trip-direction-radio-label span {
+  color: var(--bup-primary-dark, #00331e);
+}
+
 body.dark-mode .stat-label {
   color: #94a3b8 !important;
+}
+
+/* Picture 1: Route Tag Pills in Dark Mode */
+body.dark-mode .popular-routes-tags span {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .route-tag-pill {
+  background: #1a2b40 !important;
+  color: #f8fafc !important;
+  border-color: #2b4566 !important;
+  box-shadow: none !important;
+}
+
+body.dark-mode .route-tag-pill:hover {
+  background: #064e3b !important;
+  color: #34d399 !important;
+  border-color: #34d399 !important;
+}
+
+/* Picture 2: Stats Banner & Numbers in Dark Mode */
+body.dark-mode .stats-banner {
+  background: #0b1320 !important;
+  border-top-color: #1e3148 !important;
+  border-bottom-color: #1e3148 !important;
+}
+
+body.dark-mode .stat-item h3 {
+  color: #34d399 !important;
+  text-shadow: 0 0 20px rgba(52, 211, 153, 0.45) !important;
+}
+
+body.dark-mode .stat-item p {
+  color: #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+body.dark-mode .section-tag {
+  color: #34d399 !important;
+  background: rgba(52, 211, 153, 0.15) !important;
+  border: 1px solid rgba(52, 211, 153, 0.35) !important;
+  padding: 4px 14px !important;
+  border-radius: 9999px !important;
+  display: inline-block !important;
+  font-weight: 800 !important;
+}
+
+/* Picture 3: Trip Direction Box in Dark Mode */
+body.dark-mode .trip-direction-selector-box {
+  background: #162436 !important;
+  border: 1px solid #284160 !important;
+}
+
+body.dark-mode .trip-direction-heading {
+  color: #34d399 !important;
+}
+
+body.dark-mode .trip-direction-radio-label {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .trip-direction-radio-label span {
+  color: #f8fafc !important;
 }

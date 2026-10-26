@@ -31,17 +31,17 @@
         <h2>Post Your Carpool / Ride Share</h2>
         <p>Fill out the travel details below to publish your ride into the BUPGO NoSQL database.</p>
 
-        <!-- Trip Direction Selector -->
-        <div style="background: var(--bup-primary-soft); padding: 14px 18px; border-radius: var(--radius-md); margin-bottom: 22px; border: 1px solid rgba(4, 106, 56, 0.2);">
-          <label style="font-size: 0.85rem; font-weight: 700; color: var(--bup-primary-dark); display: block; margin-bottom: 8px;">
+        <!-- Trip Direction Selector (Picture 3 Contrast Fix) -->
+        <div class="trip-direction-selector-box">
+          <label class="trip-direction-heading">
             Trip Type & Direction:
           </label>
           <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; font-size: 0.92rem;">
+            <label class="trip-direction-radio-label">
               <input type="radio" name="offer-direction" value="to_campus" checked onchange="setOfferDirection('to_campus')">
               <span>🎓 Morning Commute: City ➔ BUP Campus</span>
             </label>
-            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; font-size: 0.92rem;">
+            <label class="trip-direction-radio-label">
               <input type="radio" name="offer-direction" value="return" onchange="setOfferDirection('return')">
               <span>🏠 Return Trip: BUP Campus ➔ Home / City</span>
             </label>

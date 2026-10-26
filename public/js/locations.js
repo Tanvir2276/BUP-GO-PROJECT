@@ -361,21 +361,17 @@ const BUP_LOCATIONS = BANGLADESH_LOCATIONS;
 
 /**
  * Enhanced Nationwide Locations Autocomplete
- * Generates datalist and real-time floating suggestion widget
+ * Uses pure custom floating suggestion widget with pins & category highlights.
+ * Native datalist is removed to avoid duplicate dark list collisions in Chrome.
  */
 function initLocationsAutocomplete() {
-  let datalist = document.getElementById('bup-locations-list');
-  if (!datalist) {
-    datalist = document.createElement('datalist');
-    datalist.id = 'bup-locations-list';
-    
-    // Sort alphabetically for clean datalist suggestions
-    const sorted = [...BANGLADESH_LOCATIONS].sort((a, b) => a.localeCompare(b));
-    datalist.innerHTML = sorted.map(loc => `<option value="${loc}"></option>`).join('');
-    document.body.appendChild(datalist);
+  // Remove any stale native datalist to prevent duplicate dropdown overlap (Picture 4 fix)
+  const existingDatalist = document.getElementById('bup-locations-list');
+  if (existingDatalist) {
+    existingDatalist.remove();
   }
 
-  // Hook all location input fields
+  // Hook all location input fields with custom floating popup ONLY
   const targetInputIds = [
     'search-start', 'search-dest',
     'filter-start', 'filter-dest',
@@ -386,7 +382,7 @@ function initLocationsAutocomplete() {
   targetInputIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      el.setAttribute('list', 'bup-locations-list');
+      el.removeAttribute('list');
       el.setAttribute('autocomplete', 'off');
       setupCustomLocationPopup(el);
     }
