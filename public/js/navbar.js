@@ -467,6 +467,11 @@ function renderNavbar() {
                     <span class="dropdown-role-tag ${user.role || 'passenger'}">
                       ${user.role === 'admin' ? '🛡️ Administrator' : user.role === 'driver' ? '🚗 Verified Driver' : '🎓 Student Passenger'}
                     </span>
+                    <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 5px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); padding: 3px 8px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; color: #d97706;">
+                      <span>🔥 Day ${localStorage.getItem('bupgo_streak_days') || '1'} Streak</span>
+                      <span>•</span>
+                      <span>${localStorage.getItem('bupgo_user_points') || '50'} Pts</span>
+                    </div>
                   </div>
                 </div>
 
@@ -634,9 +639,104 @@ function renderFooter() {
   `;
 }
 
+// Daily Login Streak Loyalty System (Requirements: 1 pt -> 2 pts -> 4 pts... 2x doubling; reset on missed day)
+function initDailyLoginStreak() {
+  const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+  if (!user) return;
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const lastDateStr = localStorage.getItem('bupgo_last_streak_date');
+  let streakDays = parseInt(localStorage.getItem('bupgo_streak_days') || '0', 10);
+  let currentPoints = parseInt(localStorage.getItem('bupgo_user_points') || '50', 10);
+
+  if (!lastDateStr) {
+    // First time login
+    streakDays = 1;
+    const ptsAwarded = 1; // 2^0
+    currentPoints += ptsAwarded;
+    localStorage.setItem('bupgo_streak_days', streakDays.toString());
+    localStorage.setItem('bupgo_last_streak_date', todayStr);
+    localStorage.setItem('bupgo_user_points', currentPoints.toString());
+    renderStreakBanner(streakDays, ptsAwarded, false);
+  } else if (lastDateStr !== todayStr) {
+    const lastDate = new Date(lastDateStr);
+    const currDate = new Date(todayStr);
+    const diffDays = Math.round((currDate - lastDate) / (1000 * 3600 * 24));
+
+    let wasReset = false;
+    if (diffDays === 1) {
+      // Consecutive daily login! Streak doubles!
+      streakDays += 1;
+    } else if (diffDays > 1) {
+      // Missed at least 1 day, streak breaks & resets to Day 1
+      streakDays = 1;
+      wasReset = true;
+    }
+
+    const ptsAwarded = Math.pow(2, streakDays - 1);
+    currentPoints += ptsAwarded;
+    localStorage.setItem('bupgo_streak_days', streakDays.toString());
+    localStorage.setItem('bupgo_last_streak_date', todayStr);
+    localStorage.setItem('bupgo_user_points', currentPoints.toString());
+    renderStreakBanner(streakDays, ptsAwarded, wasReset);
+  }
+}
+
+function getStreakInfo() {
+  const streakDays = Math.max(1, parseInt(localStorage.getItem('bupgo_streak_days') || '1', 10));
+  const pointsToday = Math.pow(2, streakDays - 1);
+  const nextPoints = Math.pow(2, streakDays);
+  return { streakDays, pointsToday, nextPoints };
+}
+
+function renderStreakBanner(streakDays, pointsToday, wasReset) {
+  const toastId = 'bupgo-streak-toast';
+  const existing = document.getElementById(toastId);
+  if (existing) existing.remove();
+
+  const banner = document.createElement('div');
+  banner.id = toastId;
+  banner.style.cssText = `
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 2px solid ${wasReset ? '#f59e0b' : '#10b981'};
+    color: #ffffff;
+    border-radius: 14px;
+    padding: 16px 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 380px;
+    animation: slideUpFade 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  `;
+
+  banner.innerHTML = `
+    <div style="font-size: 2.2rem; line-height: 1;">${wasReset ? '⚡' : '🔥'}</div>
+    <div style="flex: 1;">
+      <div style="font-size: 0.95rem; font-weight: 800; color: ${wasReset ? '#fbbf24' : '#34d399'};">
+        ${wasReset ? 'Streak Reset: Day 1' : `Daily Streak: Day ${streakDays}!`}
+      </div>
+      <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 2px;">
+        Earned <strong>+${pointsToday} Points</strong> today! (2x doubling streak: Next login = +${pointsToday * 2} pts)
+      </div>
+    </div>
+    <button onclick="document.getElementById('${toastId}').remove()" style="background:none; border:none; color:#94a3b8; font-size:1.3rem; cursor:pointer;">&times;</button>
+  `;
+
+  document.body.appendChild(banner);
+  setTimeout(() => {
+    if (banner.parentNode) banner.remove();
+  }, 7000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   renderNavbar();
   renderFooter();
   initNotificationBadge();
+  initDailyLoginStreak();
 });

@@ -35,6 +35,13 @@ async function quickLogin(loginId, password) {
   }
 }
 
+function selectRegAvatar(card, avatarUrl) {
+  document.querySelectorAll('.avatar-option-card').forEach(c => c.classList.remove('selected'));
+  if (card) card.classList.add('selected');
+  const input = document.getElementById('reg-avatar');
+  if (input) input.value = avatarUrl;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // If already logged in, redirect
   if (Auth.isLoggedIn()) {
@@ -86,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const role = document.getElementById('reg-role').value;
       const vehicleType = document.getElementById('reg-vehicle').value.trim();
       const password = document.getElementById('reg-pass').value;
+      const avatar = document.getElementById('reg-avatar')?.value || '';
 
       regSubmit.disabled = true;
       regSubmit.textContent = 'Creating account in NoSQL DB...';
@@ -102,7 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
             email,
             role,
             vehicleType,
-            password
+            password,
+            avatar
           })
         });
 

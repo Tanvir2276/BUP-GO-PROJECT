@@ -141,6 +141,48 @@ input, select, textarea {
   max-width: 260px;
   object-fit: contain;
   display: block;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  animation: logoFloatingSheen 4s ease-in-out infinite alternate;
+}
+
+.bupgo-custom-logo:hover {
+  transform: translateY(-2px) scale(1.03);
+  filter: drop-shadow(0 0 10px rgba(0, 104, 63, 0.45));
+}
+
+@keyframes logoFloatingSheen {
+  0% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 2px 5px rgba(0, 72, 43, 0.15));
+  }
+  100% {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 5px 12px rgba(212, 155, 41, 0.28));
+  }
+}
+
+@keyframes buttonPulseGlow {
+  0% {
+    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.25);
+  }
+  50% {
+    box-shadow: 0 6px 18px rgba(0, 104, 63, 0.42), 0 0 10px rgba(212, 155, 41, 0.25);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(0, 72, 43, 0.25);
+  }
+}
+
+@keyframes buttonGlowEmerald {
+  0% {
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(52, 211, 153, 0.6), 0 0 12px rgba(16, 185, 129, 0.4);
+  }
+  100% {
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  }
 }
 
 /* Nav Link Pills matching reference image */
@@ -804,6 +846,26 @@ input, select, textarea {
   border: 1px solid transparent;
 }
 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: scale(0.97) translateY(1px);
+}
+
 .btn-sm {
   padding: 6px 12px;
   font-size: 0.85rem;
@@ -817,35 +879,42 @@ input, select, textarea {
 }
 
 .btn-primary {
-  background-color: var(--bup-primary);
+  background: linear-gradient(135deg, var(--bup-primary) 0%, var(--bup-primary-light) 100%);
   color: #ffffff;
-  box-shadow: 0 4px 10px rgba(4, 106, 56, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 72, 43, 0.28);
+  animation: buttonPulseGlow 3.5s ease-in-out infinite;
 }
 
 .btn-primary:hover {
-  background-color: var(--bup-primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 15px rgba(4, 106, 56, 0.35);
+  background: linear-gradient(135deg, var(--bup-primary-dark) 0%, var(--bup-primary) 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 22px rgba(0, 104, 63, 0.45), 0 0 14px rgba(212, 155, 41, 0.35);
 }
 
 .btn-secondary {
   background-color: var(--bg-card);
   color: var(--bup-primary);
   border-color: var(--border-color);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .btn-secondary:hover {
   border-color: var(--bup-primary);
   background-color: var(--bup-primary-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 72, 43, 0.15);
 }
 
 .btn-gold {
-  background-color: var(--bup-gold);
+  background: linear-gradient(135deg, #d49b29 0%, #f59e0b 100%);
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(212, 155, 41, 0.3);
 }
 
 .btn-gold:hover {
-  background-color: var(--bup-gold-hover);
+  background: linear-gradient(135deg, #b88622 0%, #d49b29 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(212, 155, 41, 0.45);
 }
 
 .btn-danger {
@@ -857,12 +926,22 @@ input, select, textarea {
 .btn-danger:hover {
   background-color: var(--bup-red);
   color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
 }
 
 .btn-success {
-  background-color: #dcfce7;
-  color: var(--bup-primary);
-  border-color: #86efac;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.45);
+}
 }
 
 .btn-success:hover {
@@ -1640,12 +1719,32 @@ body.dark-mode .btn-primary {
   color: #ffffff !important;
   border: none !important;
   box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+  animation: buttonGlowEmerald 3.5s ease-in-out infinite;
 }
 
 body.dark-mode .btn-primary:hover {
   background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
   color: #042f1a !important;
-  box-shadow: 0 6px 20px rgba(52, 211, 153, 0.55) !important;
+  box-shadow: 0 8px 24px rgba(52, 211, 153, 0.65), 0 0 16px rgba(16, 185, 129, 0.5) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+body.dark-mode .btn-secondary {
+  background: #192738 !important;
+  color: #34d399 !important;
+  border: 1px solid #2d4562 !important;
+}
+
+body.dark-mode .btn-secondary:hover {
+  background: #22354c !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 14px rgba(52, 211, 153, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+body.dark-mode .demo-pill-btn:hover {
+  box-shadow: 0 0 16px rgba(52, 211, 153, 0.4) !important;
+  transform: translateY(-2px) scale(1.02);
 }
 
 body.dark-mode .tabs-nav {

@@ -393,21 +393,22 @@ async function openRideDetails(rideId) {
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
-        <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block;">Pickup Location</span>
-          <strong style="color: var(--text-main); font-size: 0.95rem;">${ride.startingLocation}</strong>
+        <div style="background: var(--bg-main); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 3px;">📍 Pickup Location</span>
+          <strong style="color: var(--text-main); font-size: 0.95rem; font-weight: 800;">${ride.startingLocation}</strong>
         </div>
-        <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block;">Destination</span>
-          <strong style="color: var(--text-main); font-size: 0.95rem;">${ride.destination}</strong>
+        <div style="background: var(--bg-main); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 3px;">🏁 Destination</span>
+          <strong style="color: var(--text-main); font-size: 0.95rem; font-weight: 800;">${ride.destination}</strong>
         </div>
-        <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block;">Date & Time</span>
-          <strong style="color: var(--text-main); font-size: 0.95rem;">${ride.travelDate} at ${ride.departureTime}</strong>
+        <div style="background: var(--bg-main); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 3px;">📅 Date & Time</span>
+          <strong style="color: var(--text-main); font-size: 0.95rem; font-weight: 800;">${ride.travelDate} (${ride.departureTime})</strong>
         </div>
-        <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block;">Vehicle & Fare</span>
-          <strong style="color: var(--text-main); font-size: 0.95rem;">${ride.transportationType} (${ride.vehicleModel || 'Standard'}) • ৳${ride.estimatedCost}</strong>
+        <div style="background: var(--bg-main); padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; display: block; margin-bottom: 3px;">🚘 Vehicle & Fare</span>
+          <strong style="color: var(--bup-primary); font-size: 1.05rem; font-weight: 800;">${ride.transportationType} • ৳ ${ride.estimatedCost}</strong>
+          <small style="color: var(--text-muted); display: block; font-size: 0.72rem;">${ride.vehicleModel || 'Standard'}</small>
         </div>
       </div>
 

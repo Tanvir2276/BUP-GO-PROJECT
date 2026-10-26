@@ -75,8 +75,16 @@ async function loadMyRides() {
     // Calculate Driver Earnings with 10% Platform Commission (Requirement 5)
     let totalGross = 0;
     let totalPassengers = 0;
+    let activeRidesCount = 0;
+    let completedRidesCount = 0;
 
     data.postedRides.forEach(ride => {
+      if (ride.status === 'completed') {
+        completedRidesCount++;
+      } else {
+        activeRidesCount++;
+      }
+
       const accepted = (ride.requests || []).filter(r => r.status === 'accepted');
       accepted.forEach(req => {
         const seats = Number(req.seatsRequested || 1);
@@ -87,6 +95,12 @@ async function loadMyRides() {
 
     const platformCommission = Math.round(totalGross * 0.10);
     const driverNet = totalGross - platformCommission;
+
+    // Update Driver Offered Rides Summary
+    const offeredCountEl = document.getElementById('driver-total-offered-count');
+    const offeredBreakdownEl = document.getElementById('driver-offered-breakdown');
+    if (offeredCountEl) offeredCountEl.textContent = data.postedRides.length;
+    if (offeredBreakdownEl) offeredBreakdownEl.textContent = `${activeRidesCount} Active/Pending • ${completedRidesCount} Completed`;
 
     // Update counts
     if (document.getElementById('badge-offered-count')) {
@@ -108,10 +122,19 @@ async function loadMyRides() {
     if (passengersEl) passengersEl.textContent = `${totalPassengers} Students`;
     if (carbonEl) carbonEl.textContent = `${(totalPassengers * 3.8).toFixed(1)} kg`;
 
-    // Passenger Pathao-Style Loyalty & Points Program (Requirements 6 & 7)
+    // Passenger Pathao-Style Loyalty & Daily Login Streak
     const completedReqs = data.requestedRides.filter(r => r.request.status === 'accepted');
     const userStoredPoints = Number(localStorage.getItem('bupgo_user_points') || (Math.max(50, completedReqs.length * 10 + 20)));
     localStorage.setItem('bupgo_user_points', userStoredPoints);
+
+    const streakDays = Math.max(1, parseInt(localStorage.getItem('bupgo_streak_days') || '1', 10));
+    const streakPtsToday = Math.pow(2, streakDays - 1);
+    const streakNextPts = Math.pow(2, streakDays);
+
+    const streakValEl = document.getElementById('passenger-streak-val');
+    const streakSubEl = document.getElementById('passenger-streak-sub');
+    if (streakValEl) streakValEl.textContent = `Day ${streakDays} (+${streakPtsToday} pts)`;
+    if (streakSubEl) streakSubEl.textContent = `Next daily login: +${streakNextPts} pts`;
 
     const ptsValEl = document.getElementById('passenger-points-val');
     const mileValEl = document.getElementById('passenger-milestone-val');
@@ -159,8 +182,23 @@ function renderPostedRides(rides, container) {
     const acceptedRequests = requests.filter(r => r.status === 'accepted');
     const hasPending = pendingRequests.length > 0;
 
+    const isCompleted = ride.status === 'completed';
+    const isInProgress = ride.status === 'in_progress';
+
+    const cardStatusStyle = isCompleted
+      ? 'border-left: 6px solid #10b981; border-top: 1px solid rgba(16, 185, 129, 0.35); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);'
+      : isInProgress
+      ? 'border-left: 6px solid #3b82f6; border-top: 1px solid rgba(59, 130, 246, 0.35); box-shadow: 0 4px 14px rgba(59, 130, 246, 0.12);'
+      : 'border-left: 6px solid #f59e0b; border-top: 1px solid rgba(245, 158, 11, 0.35); box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12);';
+
+    const statusBadge = isCompleted
+      ? `<span class="badge badge-green" style="font-weight: 700; background: rgba(16, 185, 129, 0.2); color: #059669; border: 1px solid #10b981;">✓ COMPLETED TRIP</span>`
+      : isInProgress
+      ? `<span class="badge badge-blue" style="font-weight: 700; background: rgba(59, 130, 246, 0.2); color: #2563eb; border: 1px solid #3b82f6;">🚀 IN PROGRESS</span>`
+      : `<span class="badge badge-yellow" style="font-weight: 700; background: rgba(245, 158, 11, 0.2); color: #d97706; border: 1px solid #f59e0b;">🟡 PENDING / ACTIVE</span>`;
+
     return `
-      <div class="ride-card ${hasPending ? 'glow-request-pulse' : ''}">
+      <div class="ride-card ${hasPending ? 'glow-request-pulse' : ''}" style="${cardStatusStyle}">
         ${hasPending ? `
           <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; color: #047857; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 0.84rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
             <span>⚡ ${pendingRequests.length} New Passenger Request(s) Received! Please review & confirm below.</span>
@@ -171,9 +209,7 @@ function renderPostedRides(rides, container) {
         <div class="ride-card-top">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="badge ${ride.status === 'active' ? 'badge-green' : 'badge-yellow'}">
-                ${ride.status.toUpperCase()}
-              </span>
+              ${statusBadge}
               <strong style="font-size: 1.1rem; color: var(--text-main);">${ride.startingLocation} ➔ ${ride.destination}</strong>
             </div>
             <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
@@ -405,7 +441,7 @@ function renderRequestedRides(requestedList, container) {
 }
 
 // Driver updates request status (accept / reject)
-async function updateRequestStatus(requestId, status) {
+async function updateRequestStatus(requestId, status, riderName = '') {
   try {
     const res = await apiRequest(`/requests/${requestId}/status`, {
       method: 'PUT',
@@ -413,6 +449,11 @@ async function updateRequestStatus(requestId, status) {
     });
     showToast(res.message || `Request ${status}!`, 'success');
     loadMyRides();
+
+    if (status === 'accepted') {
+      const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+      openTripConfirmationModal(riderName || 'Passenger', user ? user.name : 'Driver');
+    }
   } catch (err) {
     showToast(err.message || 'Error updating status', 'error');
   }
@@ -447,7 +488,7 @@ async function deleteRide(rideId) {
 }
 
 // Driver updates live trip status (Active -> In Progress -> Completed)
-async function updateRideTripStatus(rideId, status) {
+async function updateRideTripStatus(rideId, status, startingLocation = '', destination = '') {
   try {
     await apiRequest(`/rides/${rideId}`, {
       method: 'PUT',
@@ -455,9 +496,131 @@ async function updateRideTripStatus(rideId, status) {
     });
     showToast(`Trip status updated: ${status.toUpperCase()}!`, 'success');
     loadMyRides();
+
+    if (status === 'completed') {
+      const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+      openTripCelebrationModal(user ? user.name : 'Driver', rideId, { startingLocation, destination });
+    }
   } catch (err) {
     showToast(err.message || 'Failed to update trip status', 'error');
   }
+}
+
+// Trip Completion & Confirmation Celebration Modal Window (User Request 10)
+function openTripCelebrationModal(userName, rideId, rideDetails = {}) {
+  const existing = document.getElementById('bupgo-celebration-modal');
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'bupgo-celebration-modal';
+  backdrop.className = 'bupgo-calendar-modal-backdrop';
+
+  const routeText = (rideDetails.startingLocation && rideDetails.destination)
+    ? `${rideDetails.startingLocation} ➔ ${rideDetails.destination}`
+    : 'BUP Campus Carpool';
+
+  backdrop.innerHTML = `
+    <div class="bupgo-calendar-card" onclick="event.stopPropagation()" style="max-width: 440px; text-align: center; border: 2px solid #10b981; box-shadow: 0 20px 45px rgba(0,0,0,0.45); animation: slideUpFade 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.28) 100%); padding: 26px 20px 18px; border-bottom: 1px solid var(--border-color); position: relative;">
+        <button class="cal-close-btn" onclick="closeCelebrationModal()" style="position: absolute; top: 12px; right: 14px;">&times;</button>
+        <div style="font-size: 3.2rem; margin-bottom: 8px;">🎉</div>
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--text-main); line-height: 1.3;">
+          Congratulations <span style="color: var(--bup-primary);">${userName}</span>!
+        </h3>
+        <p style="font-size: 0.95rem; color: #10b981; font-weight: 700; margin-top: 4px;">
+          Your trip has been completed successfully!
+        </p>
+        <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+          📍 ${routeText}
+        </div>
+      </div>
+
+      <div style="padding: 22px 20px;">
+        <p style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">
+          ⭐ Want to rate your commute partner?
+        </p>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+          Share your experience to help the campus community and earn <strong>+10 Points</strong>!
+        </p>
+
+        <div id="star-rating-selector" style="font-size: 2.3rem; cursor: pointer; display: flex; justify-content: center; gap: 8px; margin-bottom: 8px;">
+          <span onclick="setRatingStars(1)" data-star="1" style="color: #f59e0b;">★</span>
+          <span onclick="setRatingStars(2)" data-star="2" style="color: #f59e0b;">★</span>
+          <span onclick="setRatingStars(3)" data-star="3" style="color: #f59e0b;">★</span>
+          <span onclick="setRatingStars(4)" data-star="4" style="color: #f59e0b;">★</span>
+          <span onclick="setRatingStars(5)" data-star="5" style="color: #f59e0b;">★</span>
+        </div>
+        <div id="star-rating-label" style="font-size: 0.88rem; font-weight: 700; color: #f59e0b; margin-bottom: 16px;">
+          5 Stars - Exceptional Commute!
+        </div>
+
+        <div class="form-group" style="margin-bottom: 18px; text-align: left;">
+          <label class="form-label" style="font-size: 0.8rem;">Review Feedback (Optional):</label>
+          <textarea id="celebration-rating-comment" class="form-control" rows="2" placeholder="Smooth driving, polite student, on time..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeCelebrationModal()">Maybe Later</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="submitCelebrationRating('${rideId}')" style="font-weight: 700;">
+            🌟 Submit Rating & Claim +10 Pts
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  backdrop.addEventListener('click', closeCelebrationModal);
+  document.body.appendChild(backdrop);
+}
+
+function closeCelebrationModal() {
+  const modal = document.getElementById('bupgo-celebration-modal');
+  if (modal) modal.remove();
+}
+
+function submitCelebrationRating(rideId) {
+  const currentPts = Number(localStorage.getItem('bupgo_user_points') || '50') + 10;
+  localStorage.setItem('bupgo_user_points', currentPts);
+
+  closeCelebrationModal();
+  showToast(`🎉 Review submitted! +10 Points awarded! Total Points: ${currentPts}`, 'success');
+  loadMyRides();
+}
+
+function openTripConfirmationModal(riderName, driverName) {
+  const existing = document.getElementById('bupgo-confirm-modal');
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'bupgo-confirm-modal';
+  backdrop.className = 'bupgo-calendar-modal-backdrop';
+
+  backdrop.innerHTML = `
+    <div class="bupgo-calendar-card" onclick="event.stopPropagation()" style="max-width: 420px; text-align: center; border: 2px solid #3b82f6; box-shadow: 0 20px 45px rgba(0,0,0,0.45); animation: slideUpFade 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.25) 100%); padding: 26px 20px 18px; border-bottom: 1px solid var(--border-color); position: relative;">
+        <button class="cal-close-btn" onclick="document.getElementById('bupgo-confirm-modal').remove()" style="position: absolute; top: 12px; right: 14px;">&times;</button>
+        <div style="font-size: 3.2rem; margin-bottom: 8px;">🚗</div>
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--text-main); line-height: 1.3;">
+          🎉 Ride Booking Confirmed!
+        </h3>
+        <p style="font-size: 0.92rem; color: #2563eb; font-weight: 700; margin-top: 4px;">
+          Seat reserved for ${riderName}!
+        </p>
+      </div>
+
+      <div style="padding: 20px;">
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+          The passenger has been notified. Safe commute ahead with fellow BUPians!
+        </p>
+        <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('bupgo-confirm-modal').remove()" style="width: 100%; font-weight: 700;">
+          Awesome, Continue
+        </button>
+      </div>
+    </div>
+  `;
+
+  backdrop.addEventListener('click', () => backdrop.remove());
+  document.body.appendChild(backdrop);
 }
 
 // Universal Interactive Rating & Review Modal (Requirement 8)

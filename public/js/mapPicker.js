@@ -332,97 +332,133 @@ function renderLiveTrackerModal(info) {
   // Approximate route distance
   const dLat = (destCoords.lat - startCoords.lat) * 111;
   const dLng = (destCoords.lng - startCoords.lng) * 85;
-  const distKm = Math.max(1.5, Number(Math.sqrt(dLat * dLat + dLng * dLng).toFixed(1)));
+  const distKm = Math.max(3.2, Number(Math.sqrt(dLat * dLat + dLng * dLng).toFixed(1)));
   
-  // Dynamic multi-vehicle pricing
-  const bikePrice = Math.round(20 + distKm * 12);
-  const carPrice = Math.round(50 + distKm * 20);
-  const cngPrice = Math.round(40 + distKm * 14);
+  // Realistic Dhaka / Pathao Market Pricing (Image 1 calibration)
+  const bikePrice = Math.max(75, Math.round(35 + distKm * 18));
+  const cngPrice = Math.max(120, Math.round(60 + distKm * 21));
+  const plusCarPrice = Math.max(260, Math.round(150 + distKm * 52));
+  const primeCarPrice = Math.max(380, Math.round(220 + distKm * 68));
+
+  const pickupEtaMins = 8;
+  const travelDurationMins = Math.max(20, Math.round(distKm * 2.8 + 8));
 
   const backdrop = document.createElement('div');
   backdrop.className = 'bupgo-map-modal-backdrop';
   backdrop.id = 'bupgo-live-tracker-modal';
 
   backdrop.innerHTML = `
-    <div class="bupgo-map-modal-card" style="max-width: 780px; height: 90vh; max-height: 720px;" onclick="event.stopPropagation()">
-      <div class="map-modal-header" style="background: linear-gradient(135deg, #064e3b 0%, #047857 100%);">
+    <div class="bupgo-map-modal-card" style="max-width: 820px; height: 92vh; max-height: 780px;" onclick="event.stopPropagation()">
+      <div class="map-modal-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
         <div>
-          <h4>📍 Live GPS Route & Driver Tracker</h4>
-          <p>Real-time vehicle position & multi-vehicle fare comparison (Uber / Pathao style)</p>
+          <h4>🗺️ Pathao Live GPS Navigation & Traffic Heatmap</h4>
+          <p>Real-time road congestion, shortest path & live vehicle tracking (Pathao UI)</p>
         </div>
         <button class="map-modal-close-btn" onclick="closeLiveRideTracker()">&times;</button>
       </div>
 
-      <!-- Map Canvas with Floating Driver Overlay -->
-      <div class="map-canvas-wrapper" style="position: relative; flex: 1;">
-        <!-- Floating Driver Live HUD -->
-        <div class="tracker-driver-overlay">
-          <div class="tracker-driver-col">
-            <img src="${info.driverAvatar}" alt="${info.driverName}" class="tracker-driver-avatar">
-            <div>
-              <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">${info.driverName}</div>
-              <div style="font-size: 0.76rem; color: var(--text-muted);">${info.vehicleModel} • ⭐ 4.95 (Top Rated)</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div class="tracker-eta-pill">
-              <span>🚗 Driver is ~4 mins away (${distKm} km)</span>
-            </div>
-            <button class="btn btn-secondary btn-sm" onclick="alert('📞 Connecting secure call to ${info.driverName} (01711-223344)...')" style="padding: 6px 12px; font-size: 0.78rem;">
-              📞 Call
-            </button>
-          </div>
-        </div>
-
+      <!-- Map Canvas with Floating HUD & Traffic Legend -->
+      <div class="map-canvas-wrapper" style="position: relative; flex: 1; min-height: 280px;">
         <div id="bupgo-live-tracker-map" style="width: 100%; height: 100%;"></div>
+
+        <!-- Live Traffic Indicator Widget (Image 1) -->
+        <div class="pathao-traffic-legend">
+          <span>🚦 Route Traffic:</span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;">
+            <span class="traffic-dot" style="background: #10b981;"></span> Free
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;">
+            <span class="traffic-dot" style="background: #f59e0b;"></span> Moderate
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 4px;">
+            <span class="traffic-dot" style="background: #ef4444;"></span> Congested
+          </span>
+        </div>
       </div>
 
-      <!-- Multi-Vehicle Fare Comparison Bar (Requirement 11) -->
-      <div class="tracker-vehicle-comparison-box">
-        <div class="tracker-vehicle-title">
-          <span>⚡ Multi-Vehicle Trip Comparison (${distKm} km to Destination)</span>
-          <span style="color: var(--bup-primary); font-weight: 700;">Includes 10% Platform Guarantee</span>
-        </div>
-        <div class="multi-vehicle-cards">
-          <!-- Bike -->
-          <div class="multi-veh-item ${info.vehicleType.toLowerCase().includes('bike') ? 'selected' : ''}" onclick="selectVehicleInTracker('Bike', ${bikePrice})">
-            <div style="font-size: 1.5rem;">🏍️</div>
-            <div class="multi-veh-name">Motorbike</div>
-            <div class="multi-veh-fare">৳ ${bikePrice}</div>
-            <div class="multi-veh-desc">৳20 Base • Fastest</div>
+      <!-- Pathao Ride Details Sheet (Image 1 Exact Layout) -->
+      <div class="pathao-ride-sheet">
+        <div class="pathao-sheet-header">
+          <div>
+            <div class="pathao-sheet-title">Ride Details</div>
+            <div style="font-size: 0.76rem; color: #f59e0b; font-weight: 700; margin-top: 2px;">
+              ℹ️ A fee may apply for long distance pickup • 10% BUPGO Platform Guarantee
+            </div>
           </div>
+          <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.78rem; padding: 4px 10px;">
+            📅 Pickup now ▼
+          </button>
+        </div>
 
-          <!-- Car -->
-          <div class="multi-veh-item ${info.vehicleType.toLowerCase().includes('car') ? 'selected' : ''}" onclick="selectVehicleInTracker('Car', ${carPrice})">
-            <div style="font-size: 1.5rem;">🚗</div>
-            <div class="multi-veh-name">Personal Car</div>
-            <div class="multi-veh-fare">৳ ${carPrice}</div>
-            <div class="multi-veh-desc">৳50 Base • AC Comfort</div>
+        <!-- Vehicle Rows Matching Image 1 -->
+        <div class="pathao-vehicle-list">
+          <!-- Bike -->
+          <div class="pathao-vehicle-row active" onclick="selectPathaoVehicleRow(this, 'Bike', ${bikePrice})" data-veh="Bike">
+            <div class="pathao-veh-left">
+              <div class="pathao-veh-icon">🏍️</div>
+              <div class="pathao-veh-info">
+                <h5>Bike <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">👤 1</span></h5>
+                <div class="pathao-veh-eta">${pickupEtaMins} mins away</div>
+                <div class="pathao-veh-sub">Quick and affordable ride</div>
+              </div>
+            </div>
+            <div class="pathao-veh-price">
+              <div class="pathao-veh-fare-val">৳ ${bikePrice}</div>
+            </div>
           </div>
 
           <!-- CNG -->
-          <div class="multi-veh-item ${info.vehicleType.toLowerCase().includes('cng') ? 'selected' : ''}" onclick="selectVehicleInTracker('CNG', ${cngPrice})">
-            <div style="font-size: 1.5rem;">🛺</div>
-            <div class="multi-veh-name">CNG / Auto</div>
-            <div class="multi-veh-fare">৳ ${cngPrice}</div>
-            <div class="multi-veh-desc">৳40 Base • Group Shared</div>
+          <div class="pathao-vehicle-row" onclick="selectPathaoVehicleRow(this, 'CNG', ${cngPrice})" data-veh="CNG">
+            <div class="pathao-veh-left">
+              <div class="pathao-veh-icon">🛺</div>
+              <div class="pathao-veh-info">
+                <h5>CNG <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">👤 3</span></h5>
+                <div class="pathao-veh-eta">11 mins away</div>
+                <div class="pathao-veh-sub">Your local ride, just around the corner</div>
+              </div>
+            </div>
+            <div class="pathao-veh-price">
+              <div class="pathao-veh-fare-val">~৳ ${cngPrice}</div>
+              <div style="font-size: 0.68rem; color: #16a34a; font-weight: 700;">💵 Offer your fare</div>
+            </div>
+          </div>
+
+          <!-- Plus Intercity / Car -->
+          <div class="pathao-vehicle-row" onclick="selectPathaoVehicleRow(this, 'Plus Car', ${plusCarPrice})" data-veh="Car">
+            <div class="pathao-veh-left">
+              <div class="pathao-veh-icon">🚗</div>
+              <div class="pathao-veh-info">
+                <h5>Plus Intercity <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">👤 4</span></h5>
+                <div class="pathao-veh-eta">8 mins away</div>
+                <div class="pathao-veh-sub">Affordable cars for your daily commute</div>
+              </div>
+            </div>
+            <div class="pathao-veh-price">
+              <div class="pathao-veh-fare-val">৳ ${plusCarPrice}</div>
+              <div style="font-size: 0.68rem; color: #16a34a; font-weight: 700;">💵 Offer your fare</div>
+            </div>
+          </div>
+
+          <!-- Prime Intercity -->
+          <div class="pathao-vehicle-row" onclick="selectPathaoVehicleRow(this, 'Prime Car', ${primeCarPrice})" data-veh="Prime">
+            <div class="pathao-veh-left">
+              <div class="pathao-veh-icon">🚘</div>
+              <div class="pathao-veh-info">
+                <h5>Prime Intercity <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">👤 4</span></h5>
+                <div class="pathao-veh-eta">5 mins away</div>
+                <div class="pathao-veh-sub">Premium cars for your comfort</div>
+              </div>
+            </div>
+            <div class="pathao-veh-price">
+              <div class="pathao-veh-fare-val">~৳ ${primeCarPrice}</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Modal Footer -->
-      <div class="map-modal-footer" style="padding: 10px 18px;">
-        <div style="font-size: 0.8rem; color: var(--text-muted);">
-          <span>Route: <strong>${info.startLoc}</strong> ➔ <strong>${info.destLoc}</strong></span>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary btn-sm" onclick="alert('🚨 Campus SOS: BUP Proctorial & Security Office notified with your live coordinates.')" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
-            🚨 Emergency SOS
-          </button>
-          <button class="btn btn-primary btn-sm" onclick="closeLiveRideTracker()">
-            Close Map
-          </button>
-        </div>
+        <!-- Big Red Choose Button (Image 1 Replica) -->
+        <button type="button" class="btn-choose-pathao" id="btn-pathao-confirm" onclick="confirmPathaoBooking()">
+          Choose Bike — ৳ ${bikePrice}
+        </button>
       </div>
     </div>
   `;
@@ -432,16 +468,29 @@ function renderLiveTrackerModal(info) {
   liveTrackerModal = backdrop;
 
   setTimeout(() => {
-    initLiveTrackerLeaflet(startCoords, destCoords, info);
+    initLiveTrackerLeaflet(startCoords, destCoords, info, distKm, pickupEtaMins, travelDurationMins);
   }, 120);
 }
 
-function selectVehicleInTracker(vehType, price) {
-  document.querySelectorAll('.multi-veh-item').forEach(el => el.classList.remove('selected'));
-  if (event && event.currentTarget) event.currentTarget.classList.add('selected');
+let selectedPathaoVeh = 'Bike';
+let selectedPathaoPrice = 274;
+
+function selectPathaoVehicleRow(el, vehName, price) {
+  document.querySelectorAll('.pathao-vehicle-row').forEach(r => r.classList.remove('active'));
+  if (el) el.classList.add('active');
+  selectedPathaoVeh = vehName;
+  selectedPathaoPrice = price;
+
+  const btn = document.getElementById('btn-pathao-confirm');
+  if (btn) btn.textContent = `Choose ${vehName} — ৳ ${price}`;
 }
 
-function initLiveTrackerLeaflet(startCoords, destCoords, info) {
+function confirmPathaoBooking() {
+  alert(`🚗 Ride Request Dispatched!\n\nVehicle: ${selectedPathaoVeh}\nEstimated Fare: ৳${selectedPathaoPrice}\nNearby drivers have been notified with high priority!`);
+  closeLiveRideTracker();
+}
+
+function initLiveTrackerLeaflet(startCoords, destCoords, info, distKm, pickupEta, travelEta) {
   const container = document.getElementById('bupgo-live-tracker-map');
   if (!container || !window.L) return;
 
@@ -459,47 +508,98 @@ function initLiveTrackerLeaflet(startCoords, destCoords, info) {
     attribution: '© OpenStreetMap contributors'
   }).addTo(liveTrackerMap);
 
-  // Generate intermediate path points for realistic curving route
+  // Generate intermediate points along shortest path with natural curvature
   const points = [];
-  const numSteps = 20;
+  const numSteps = 24;
   for (let i = 0; i <= numSteps; i++) {
     const t = i / numSteps;
-    // Add slight natural curve offset
-    const curveOffset = Math.sin(t * Math.PI) * 0.003;
+    const curveOffset = Math.sin(t * Math.PI) * 0.0035;
     const pLat = startCoords.lat + (destCoords.lat - startCoords.lat) * t + curveOffset;
     const pLng = startCoords.lng + (destCoords.lng - startCoords.lng) * t - curveOffset;
     points.push([pLat, pLng]);
   }
 
-  // Draw Route Polyline
-  const polyline = L.polyline(points, {
-    color: '#10b981',
-    weight: 5,
-    opacity: 0.85,
-    dashArray: '8, 8'
-  }).addTo(liveTrackerMap);
+  // Draw Multi-Colored Live Traffic Congestion Polyline (Image 1)
+  const seg1 = points.slice(0, 9);
+  const seg2 = points.slice(8, 17);
+  const seg3 = points.slice(16, points.length);
 
-  // Start Marker (Pickup)
-  const startMarker = L.marker([startCoords.lat, startCoords.lng]).addTo(liveTrackerMap);
-  startMarker.bindPopup(`<b>🟢 Pickup Point</b><br>${info.startLoc}`).openPopup();
+  // 1. Green Segment (Free-flowing road)
+  L.polyline(seg1, { color: '#10b981', weight: 6, opacity: 0.9 }).addTo(liveTrackerMap);
+  // 2. Yellow Segment (Moderate city traffic)
+  L.polyline(seg2, { color: '#f59e0b', weight: 6, opacity: 0.9 }).addTo(liveTrackerMap);
+  // 3. Red Segment (Heavy congestion near intersections/flyover)
+  L.polyline(seg3, { color: '#ef4444', weight: 6, opacity: 0.9 }).addTo(liveTrackerMap);
 
-  // Destination Marker
-  const destMarker = L.marker([destCoords.lat, destCoords.lng]).addTo(liveTrackerMap);
-  destMarker.bindPopup(`<b>🏁 Destination</b><br>${info.destLoc}`);
+  // Floating Pickup Card Pin (Image 1: "Pickup in 8 mins")
+  const pickupCardIcon = L.divIcon({
+    className: 'pathao-pin-icon-wrap',
+    html: `
+      <div class="pathao-floating-pin-card">
+        <span style="font-size: 1.1rem;">📍</span>
+        <div>
+          <strong>Pickup in ${pickupEta} mins</strong>
+          <span class="pin-title">${info.startLoc} &gt;</span>
+        </div>
+      </div>
+    `,
+    iconSize: [190, 44],
+    iconAnchor: [95, 44]
+  });
+  L.marker([startCoords.lat, startCoords.lng], { icon: pickupCardIcon }).addTo(liveTrackerMap);
 
-  // Moving Driver Marker
-  let currentStep = 3;
-  const vehIcon = L.divIcon({
+  // Floating Destination Card Pin (Image 1: "Reach in 42 mins")
+  const destCardIcon = L.divIcon({
+    className: 'pathao-pin-icon-wrap',
+    html: `
+      <div class="pathao-floating-pin-card" style="border-left: 4px solid #ef4444;">
+        <span style="font-size: 1.1rem;">🏁</span>
+        <div>
+          <strong>Reach in ${travelEta} mins</strong>
+          <span class="pin-title">${info.destLoc} &gt;</span>
+        </div>
+      </div>
+    `,
+    iconSize: [210, 44],
+    iconAnchor: [105, 44]
+  });
+  L.marker([destCoords.lat, destCoords.lng], { icon: destCardIcon }).addTo(liveTrackerMap);
+
+  // Scatter Nearby Available Drivers on Map (Image 1 replica: multiple vehicle icons)
+  const nearbyVehicles = [
+    { offsetLat: 0.005, offsetLng: 0.004, icon: '🏍️' },
+    { offsetLat: -0.004, offsetLng: 0.006, icon: '🚗' },
+    { offsetLat: 0.007, offsetLng: -0.005, icon: '🛺' },
+    { offsetLat: -0.006, offsetLng: -0.004, icon: '🏍️' },
+    { offsetLat: 0.002, offsetLng: 0.008, icon: '🚗' }
+  ];
+
+  nearbyVehicles.forEach(nv => {
+    const vIcon = L.divIcon({
+      className: 'nearby-driver-pin',
+      html: `<div style="font-size: 1.6rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); transform: rotate(${Math.floor(Math.random() * 45)}deg);">
+               ${nv.icon}
+             </div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+    L.marker([startCoords.lat + nv.offsetLat, startCoords.lng + nv.offsetLng], { icon: vIcon }).addTo(liveTrackerMap);
+  });
+
+  // Animated En-Route Driver Marker
+  let currentStep = 4;
+  const driverIcon = L.divIcon({
     className: 'live-driver-custom-icon',
-    html: `<div style="font-size: 2rem; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); animation: pulseEta 1.5s infinite;">🚗</div>`,
+    html: `<div style="font-size: 2.1rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); animation: pulseEta 1.5s infinite;">
+             🚗
+           </div>`,
     iconSize: [36, 36],
     iconAnchor: [18, 18]
   });
 
-  liveDriverMarker = L.marker(points[currentStep], { icon: vehIcon }).addTo(liveTrackerMap);
-  liveDriverMarker.bindPopup(`<b>${info.driverName}</b><br>Speed: 36 km/h • En route to pickup`);
+  liveDriverMarker = L.marker(points[currentStep], { icon: driverIcon }).addTo(liveTrackerMap);
+  liveDriverMarker.bindPopup(`<b>${info.driverName}</b><br>Speed: 38 km/h • Shortest path to pickup`).openPopup();
 
-  // Animate driver moving smoothly along the route
   liveAnimationInterval = setInterval(() => {
     currentStep = (currentStep + 1) % points.length;
     if (liveDriverMarker) {
@@ -507,7 +607,11 @@ function initLiveTrackerLeaflet(startCoords, destCoords, info) {
     }
   }, 2200);
 
-  liveTrackerMap.fitBounds(polyline.getBounds(), { padding: [60, 60] });
+  const fullBounds = L.latLngBounds([
+    [startCoords.lat, startCoords.lng],
+    [destCoords.lat, destCoords.lng]
+  ]);
+  liveTrackerMap.fitBounds(fullBounds, { padding: [60, 60] });
   liveTrackerMap.invalidateSize();
 }
 

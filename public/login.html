@@ -95,6 +95,49 @@
           </div>
         </div>
 
+        <!-- Default Profile Photo Picker (Tom & Jerry, Oggy, Motu Patlu & Realistic) -->
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label">
+            <span>Choose Your Default Profile Avatar</span>
+            <span class="form-label-hint">Pick iconic cartoons or real student photo</span>
+          </label>
+          <input type="hidden" id="reg-avatar" value="https://api.dicebear.com/7.x/bottts/svg?seed=Tom">
+          <div class="avatar-select-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 8px;">
+            <div class="avatar-option-card selected" onclick="selectRegAvatar(this, 'https://api.dicebear.com/7.x/bottts/svg?seed=Tom')" title="Tom (Tom & Jerry)">
+              <div style="font-size: 1.8rem;">🐱</div>
+              <span>Tom</span>
+            </div>
+            <div class="avatar-option-card" onclick="selectRegAvatar(this, 'https://api.dicebear.com/7.x/bottts/svg?seed=Jerry')" title="Jerry (Tom & Jerry)">
+              <div style="font-size: 1.8rem;">🐭</div>
+              <span>Jerry</span>
+            </div>
+            <div class="avatar-option-card" onclick="selectRegAvatar(this, 'https://api.dicebear.com/7.x/bottts/svg?seed=Oggy')" title="Oggy (Oggy & The Cockroaches)">
+              <div style="font-size: 1.8rem;">🪳</div>
+              <span>Oggy</span>
+            </div>
+            <div class="avatar-option-card" onclick="selectRegAvatar(this, 'https://api.dicebear.com/7.x/bottts/svg?seed=Motu')" title="Motu (Motu Patlu)">
+              <div style="font-size: 1.8rem;">🥊</div>
+              <span>Motu</span>
+            </div>
+            <div class="avatar-option-card" onclick="selectRegAvatar(this, 'https://api.dicebear.com/7.x/bottts/svg?seed=Patlu')" title="Patlu (Motu Patlu)">
+              <div style="font-size: 1.8rem;">👓</div>
+              <span>Patlu</span>
+            </div>
+            <div class="avatar-option-card" onclick="selectRegAvatar(this, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80')" title="Real Student (Girl)">
+              <div style="font-size: 1.8rem;">👩‍🎓</div>
+              <span>Student (F)</span>
+            </div>
+            <div class="avatar-option-card" onclick="selectRegAvatar(this, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80')" title="Real Student (Boy)">
+              <div style="font-size: 1.8rem;">👨‍🎓</div>
+              <span>Student (M)</span>
+            </div>
+            <div class="avatar-option-card" onclick="selectRegAvatar(this, 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80')" title="Pro Driver">
+              <div style="font-size: 1.8rem;">🚗</div>
+              <span>Pro Driver</span>
+            </div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Password</label>
           <input type="password" id="reg-pass" class="form-control" placeholder="Create a secure password" minlength="4" required>

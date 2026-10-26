@@ -111,7 +111,7 @@ app.post('/api/auth/register', async (req, res) => {
       role: role || 'passenger',
       vehicleType: vehicleType || '',
       vehicleModel: vehicleModel || '',
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
+      avatar: (req.body.avatar && req.body.avatar.trim()) ? req.body.avatar.trim() : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
       password: passwordHash,
       bio: 'BUP Student carpooler.'
     });

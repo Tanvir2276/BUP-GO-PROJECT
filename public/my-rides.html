@@ -46,7 +46,12 @@
     <!-- Tab 1: Offered Rides (Driver View) -->
     <div id="panel-posted" class="tab-panel">
       <!-- Driver Carpool Earnings & Summary Strip (10% Platform Commission breakdown) -->
-      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 15px; box-shadow: var(--shadow-sm);">
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; box-shadow: var(--shadow-sm);">
+        <div>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🚘 Rides Offered by Driver</span>
+          <h3 style="font-size: 1.5rem; color: #3b82f6; font-weight: 800; margin-top: 2px;" id="driver-total-offered-count">0</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);" id="driver-offered-breakdown">0 Active • 0 Completed</span>
+        </div>
         <div>
           <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">💰 Gross Fare Collected</span>
           <h3 style="font-size: 1.5rem; color: var(--text-main); font-weight: 800; margin-top: 2px;" id="driver-total-earnings">৳ 0</h3>
@@ -60,14 +65,13 @@
           <h3 style="font-size: 1.5rem; color: var(--bup-primary); font-weight: 800; margin-top: 2px;" id="driver-net-earnings">৳ 0</h3>
         </div>
         <div>
-          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">👥 Co-Passengers Transported</span>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">👥 Co-Passengers</span>
           <h3 style="font-size: 1.5rem; color: var(--bup-gold); font-weight: 800; margin-top: 2px;" id="driver-total-passengers">0</h3>
         </div>
         <div>
-          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🌱 Campus Carbon Saved</span>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🌱 Carbon Saved</span>
           <h3 style="font-size: 1.5rem; color: #16a34a; font-weight: 800; margin-top: 2px;" id="driver-carbon-saved">0 kg</h3>
         </div>
-      </div>
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -86,7 +90,12 @@
     <!-- Tab 2: Requested Rides (Passenger View) -->
     <div id="panel-requested" class="tab-panel" style="display: none;">
       <!-- Passenger Loyalty & Pathao-Style Points Strip (Requirements 6 & 7) -->
-      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; box-shadow: var(--shadow-sm);">
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; box-shadow: var(--shadow-sm);">
+        <div>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🔥 Daily Login Streak</span>
+          <h3 style="font-size: 1.5rem; color: #f97316; font-weight: 800; margin-top: 2px;" id="passenger-streak-val">Day 1 (+1 pt)</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);" id="passenger-streak-sub">Doubles daily: 1, 2, 4, 8...</span>
+        </div>
         <div>
           <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🪙 BUPGO Points (10 pts/trip)</span>
           <h3 style="font-size: 1.5rem; color: #f59e0b; font-weight: 800; margin-top: 2px;" id="passenger-points-val">50 pts</h3>

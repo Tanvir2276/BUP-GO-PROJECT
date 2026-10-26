@@ -386,3 +386,221 @@ body.dark-mode .multi-veh-fare {
   color: #34d399 !important;
   text-shadow: 0 0 10px rgba(52, 211, 153, 0.5);
 }
+
+/* =========================================================
+   PATHAO-STYLE LIVE ROUTE TRAFFIC & DETAILS SHEET (Image 1)
+   ========================================================= */
+.pathao-floating-pin-card {
+  background: #ffffff;
+  color: #1e293b;
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pathao-floating-pin-card strong {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.pathao-floating-pin-card .pin-title {
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: #0f172a;
+}
+
+.pathao-traffic-legend {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  z-index: 1000;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-color, #cbd5e1);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  font-size: 0.74rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.traffic-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.pathao-ride-sheet {
+  background: var(--bg-card, #ffffff);
+  border-top: 1px solid var(--border-color, #cbd5e1);
+  padding: 16px 20px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.pathao-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pathao-sheet-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.pathao-vehicle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: 2px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background: var(--bg-main, #f8fafc);
+}
+
+.pathao-vehicle-row:hover,
+.pathao-vehicle-row.active {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.04);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.15);
+}
+
+.pathao-veh-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pathao-veh-icon {
+  font-size: 2.2rem;
+  width: 44px;
+  text-align: center;
+}
+
+.pathao-veh-info h5 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pathao-veh-eta {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.pathao-veh-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.pathao-veh-price {
+  text-align: right;
+}
+
+.pathao-veh-fare-val {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.btn-choose-pathao {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn-choose-pathao:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(239, 68, 68, 0.55);
+}
+
+/* Dark Mode Overrides for Pathao View */
+body.dark-mode .pathao-floating-pin-card {
+  background: #111c29;
+  border-color: #233752;
+  color: #f8fafc;
+}
+
+body.dark-mode .pathao-floating-pin-card strong {
+  color: #94a3b8;
+}
+
+body.dark-mode .pathao-floating-pin-card .pin-title {
+  color: #f8fafc;
+}
+
+body.dark-mode .pathao-traffic-legend {
+  background: #111c29;
+  border-color: #233752;
+  color: #cbd5e1;
+}
+
+body.dark-mode .pathao-ride-sheet {
+  background: #131f2d;
+  border-top-color: #233752;
+}
+
+body.dark-mode .pathao-sheet-title {
+  color: #f8fafc;
+}
+
+body.dark-mode .pathao-vehicle-row {
+  background: #162436;
+  border-color: #233752;
+}
+
+body.dark-mode .pathao-vehicle-row:hover,
+body.dark-mode .pathao-vehicle-row.active {
+  background: #251a24;
+  border-color: #f87171;
+}
+
+body.dark-mode .pathao-veh-info h5 {
+  color: #f8fafc;
+}
+
+body.dark-mode .pathao-veh-fare-val {
+  color: #f8fafc;
+}
