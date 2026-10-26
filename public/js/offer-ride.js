@@ -211,10 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
           })
         });
 
-        showToast(response.message || 'Ride posted successfully! Now live on BUPGO.', 'success');
-        setTimeout(() => {
-          window.location.href = 'find-ride.html';
-        }, 800);
+        window.location.href = 'find-ride.html';
       } catch (err) {
         showToast(err.message || 'Error posting ride', 'error');
         submitBtn.disabled = false;

@@ -10,19 +10,27 @@ let myRidesData = {
 function switchTab(tab) {
   const postedBtn = document.getElementById('tab-posted-btn');
   const reqBtn = document.getElementById('tab-requested-btn');
+  const histBtn = document.getElementById('tab-history-btn');
   const postedPanel = document.getElementById('panel-posted');
   const reqPanel = document.getElementById('panel-requested');
+  const histPanel = document.getElementById('panel-history');
+
+  if (postedBtn) postedBtn.classList.remove('active');
+  if (reqBtn) reqBtn.classList.remove('active');
+  if (histBtn) histBtn.classList.remove('active');
+  if (postedPanel) postedPanel.style.display = 'none';
+  if (reqPanel) reqPanel.style.display = 'none';
+  if (histPanel) histPanel.style.display = 'none';
 
   if (tab === 'posted') {
-    postedBtn.classList.add('active');
-    reqBtn.classList.remove('active');
-    postedPanel.style.display = 'block';
-    reqPanel.style.display = 'none';
+    if (postedBtn) postedBtn.classList.add('active');
+    if (postedPanel) postedPanel.style.display = 'block';
+  } else if (tab === 'history') {
+    if (histBtn) histBtn.classList.add('active');
+    if (histPanel) histPanel.style.display = 'block';
   } else {
-    reqBtn.classList.add('active');
-    postedBtn.classList.remove('active');
-    reqPanel.style.display = 'block';
-    postedPanel.style.display = 'none';
+    if (reqBtn) reqBtn.classList.add('active');
+    if (reqPanel) reqPanel.style.display = 'block';
   }
 }
 
@@ -44,6 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
     switchTab('requested');
   } else if (targetTab === 'posted') {
     switchTab('posted');
+  } else if (targetTab === 'history') {
+    switchTab('history');
   } else if (user && user.role === 'passenger') {
     switchTab('requested'); // Passengers default to requested rides view
   } else {
@@ -56,17 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadMyRides() {
   const postedContainer = document.getElementById('posted-rides-list');
   const reqContainer = document.getElementById('requested-rides-list');
+  const histContainer = document.getElementById('history-rides-list');
 
   try {
     const data = await apiRequest('/users/my-rides');
     myRidesData = data;
 
-    // Update counts
-    document.getElementById('badge-offered-count').textContent = data.postedRides.length;
-    document.getElementById('badge-requested-count').textContent = data.requestedRides.length;
-
-    // Calculate Driver Earnings & Metric Stats (Pathao / Uber Inspired)
-    let totalEarnings = 0;
+    // Calculate Driver Earnings with 10% Platform Commission (Requirement 5)
+    let totalGross = 0;
     let totalPassengers = 0;
 
     data.postedRides.forEach(ride => {
@@ -74,23 +81,64 @@ async function loadMyRides() {
       accepted.forEach(req => {
         const seats = Number(req.seatsRequested || 1);
         totalPassengers += seats;
-        totalEarnings += seats * Number(ride.estimatedCost || 0);
+        totalGross += seats * Number(ride.estimatedCost || 0);
       });
     });
 
-    const earningsEl = document.getElementById('driver-total-earnings');
+    const platformCommission = Math.round(totalGross * 0.10);
+    const driverNet = totalGross - platformCommission;
+
+    // Update counts
+    if (document.getElementById('badge-offered-count')) {
+      document.getElementById('badge-offered-count').textContent = data.postedRides.length;
+    }
+    if (document.getElementById('badge-requested-count')) {
+      document.getElementById('badge-requested-count').textContent = data.requestedRides.length;
+    }
+
+    const grossEl = document.getElementById('driver-total-earnings');
+    const feeEl = document.getElementById('driver-platform-fee');
+    const netEl = document.getElementById('driver-net-earnings');
     const passengersEl = document.getElementById('driver-total-passengers');
     const carbonEl = document.getElementById('driver-carbon-saved');
 
-    if (earningsEl) earningsEl.textContent = `৳ ${totalEarnings}`;
+    if (grossEl) grossEl.textContent = `৳ ${totalGross}`;
+    if (feeEl) feeEl.textContent = `৳ ${platformCommission}`;
+    if (netEl) netEl.textContent = `৳ ${driverNet}`;
     if (passengersEl) passengersEl.textContent = `${totalPassengers} Students`;
     if (carbonEl) carbonEl.textContent = `${(totalPassengers * 3.8).toFixed(1)} kg`;
 
+    // Passenger Pathao-Style Loyalty & Points Program (Requirements 6 & 7)
+    const completedReqs = data.requestedRides.filter(r => r.request.status === 'accepted');
+    const userStoredPoints = Number(localStorage.getItem('bupgo_user_points') || (Math.max(50, completedReqs.length * 10 + 20)));
+    localStorage.setItem('bupgo_user_points', userStoredPoints);
+
+    const ptsValEl = document.getElementById('passenger-points-val');
+    const mileValEl = document.getElementById('passenger-milestone-val');
+    const savValEl = document.getElementById('passenger-savings-val');
+
+    if (ptsValEl) {
+      ptsValEl.textContent = `${userStoredPoints} pts`;
+    }
+    if (mileValEl) {
+      if (completedReqs.length >= 100) {
+        mileValEl.textContent = `101st Ride: 100% FREE!`;
+      } else if (completedReqs.length >= 20) {
+        mileValEl.textContent = `21st Ride: 50% OFF!`;
+      } else {
+        mileValEl.textContent = `${completedReqs.length}/20 Rides (50% at 21)`;
+      }
+    }
+    if (savValEl) {
+      savValEl.textContent = `৳ ${completedReqs.length * 85 + 150}`;
+    }
+
     renderPostedRides(data.postedRides, postedContainer);
     renderRequestedRides(data.requestedRides, reqContainer);
+    renderRideHistory(data, histContainer);
   } catch (err) {
-    postedContainer.innerHTML = `<p style="color:var(--bup-red); text-align:center;">Failed to load rides: ${err.message}</p>`;
-    reqContainer.innerHTML = `<p style="color:var(--bup-red); text-align:center;">Failed to load requests: ${err.message}</p>`;
+    if (postedContainer) postedContainer.innerHTML = `<p style="color:var(--bup-red); text-align:center;">Failed to load rides: ${err.message}</p>`;
+    if (reqContainer) reqContainer.innerHTML = `<p style="color:var(--bup-red); text-align:center;">Failed to load requests: ${err.message}</p>`;
   }
 }
 
@@ -374,11 +422,10 @@ async function updateRequestStatus(requestId, status) {
 async function cancelMyRequest(requestId) {
   if (!confirm('Are you sure you want to cancel this ride request?')) return;
   try {
-    const res = await apiRequest(`/requests/${requestId}/status`, {
+    await apiRequest(`/requests/${requestId}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status: 'cancelled' })
     });
-    showToast('Ride request cancelled.', 'info');
     loadMyRides();
   } catch (err) {
     showToast(err.message || 'Error cancelling request', 'error');
@@ -520,4 +567,238 @@ async function submitUserRating(rideId, targetUserId, targetRole) {
       submitBtn.textContent = 'Submit Rating';
     }
   }
+}
+
+// =========================================================
+// RIDE HISTORY, POINTS CONVERTER & DIGITAL RECEIPTS
+// (Requirements 5, 6, 7 & 8)
+// =========================================================
+let cachedHistoryTrips = [];
+let currentHistoryFilter = 'all';
+
+function convertPointsToWallet() {
+  const currentPts = Number(localStorage.getItem('bupgo_user_points') || 50);
+  if (currentPts < 5) {
+    alert('You need at least 5 points to convert. (Rate: 5 points = ৳1 BDT)');
+    return;
+  }
+
+  const bdtEarned = Math.floor(currentPts / 5);
+  const remainingPts = currentPts % 5;
+  localStorage.setItem('bupgo_user_points', remainingPts);
+
+  const currentWallet = Number(localStorage.getItem('bupgo_wallet_balance') || 0);
+  const newWallet = currentWallet + bdtEarned;
+  localStorage.setItem('bupgo_wallet_balance', newWallet);
+
+  const ptsEl = document.getElementById('passenger-points-val');
+  if (ptsEl) ptsEl.textContent = `${remainingPts} pts`;
+
+  alert(`🎉 Success! Converted ${currentPts - remainingPts} Points into ৳${bdtEarned} BDT Wallet Credit!\n\nYour new wallet balance: ৳${newWallet} BDT.\nRate applied: 5 Points = ৳1 BDT (Pathao-style conversion).`);
+}
+
+function renderRideHistory(data, container) {
+  if (!container) return;
+
+  const trips = [];
+
+  // Driver trips
+  (data.postedRides || []).forEach(r => {
+    const acceptedCount = (r.requests || []).filter(req => req.status === 'accepted').length;
+    trips.push({
+      id: r._id,
+      role: 'driver',
+      route: `${r.startingLocation} ➔ ${r.destination}`,
+      startLoc: r.startingLocation,
+      destLoc: r.destination,
+      travelDate: r.travelDate,
+      time: r.departureTime,
+      vehicle: `${r.transportationType} (${r.vehicleModel || 'Standard'})`,
+      seats: r.totalSeats,
+      partner: `${acceptedCount} Passenger(s)`,
+      fare: Number(r.estimatedCost || 50),
+      grossTotal: Number(r.estimatedCost || 50) * Math.max(1, acceptedCount),
+      status: r.status === 'completed' ? 'Completed' : 'Active / Carpool Live',
+      points: 10
+    });
+  });
+
+  // Passenger trips
+  (data.requestedRides || []).forEach(item => {
+    const r = item.ride || {};
+    const req = item.request || {};
+    trips.push({
+      id: req._id,
+      role: 'passenger',
+      route: `${r.startingLocation || 'Pickup Point'} ➔ ${r.destination || 'BUP Campus'}`,
+      startLoc: r.startingLocation || 'Pickup Point',
+      destLoc: r.destination || 'BUP Campus',
+      travelDate: r.travelDate || 'Recent',
+      time: r.departureTime || '08:00 AM',
+      vehicle: `${r.transportationType || 'Car'} (${r.vehicleModel || 'Campus Car'})`,
+      seats: req.seatsRequested || 1,
+      partner: `Driver: ${r.driverName || 'BUP Driver'}`,
+      fare: Number(r.estimatedCost || 40),
+      grossTotal: Number(r.estimatedCost || 40) * Number(req.seatsRequested || 1),
+      status: req.status === 'accepted' ? 'Completed' : req.status === 'pending' ? 'Pending Confirmation' : 'Cancelled',
+      points: 10
+    });
+  });
+
+  cachedHistoryTrips = trips;
+  if (document.getElementById('badge-history-count')) {
+    document.getElementById('badge-history-count').textContent = trips.length;
+  }
+
+  displayFilteredHistory(container);
+}
+
+function filterHistory(type) {
+  currentHistoryFilter = type;
+  const container = document.getElementById('history-rides-list');
+  ['btn-hist-all', 'btn-hist-driver', 'btn-hist-passenger'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+
+  const activeBtn = document.getElementById(`btn-hist-${type}`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  displayFilteredHistory(container);
+}
+
+function displayFilteredHistory(container) {
+  if (!container) return;
+
+  let filtered = cachedHistoryTrips;
+  if (currentHistoryFilter === 'driver') {
+    filtered = cachedHistoryTrips.filter(t => t.role === 'driver');
+  } else if (currentHistoryFilter === 'passenger') {
+    filtered = cachedHistoryTrips.filter(t => t.role === 'passenger');
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+        <p style="color: var(--text-muted); font-size: 1rem;">No history records found for this category.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(t => {
+    const platformFee = Math.round(t.grossTotal * 0.10);
+    const driverNet = t.grossTotal - platformFee;
+
+    return `
+      <div class="ride-card" style="padding: 18px 22px; border-left: 4px solid ${t.role === 'driver' ? '#10b981' : 'var(--bup-blue)'};">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="badge ${t.role === 'driver' ? 'badge-green' : 'badge-blue'}" style="font-size: 0.75rem;">
+                ${t.role === 'driver' ? '🚗 Driver Trip' : '🎒 Passenger Trip'}
+              </span>
+              <span class="badge ${t.status.includes('Completed') ? 'badge-green' : 'badge-yellow'}" style="font-size: 0.75rem;">
+                ${t.status}
+              </span>
+              <span class="badge badge-yellow" style="font-size: 0.72rem; padding: 1px 7px;">
+                🪙 +${t.points} Points Earned
+              </span>
+            </div>
+            <h4 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-top: 6px;">
+              ${t.route}
+            </h4>
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+              <span>📅 ${t.travelDate} (${t.time})</span> • 
+              <span>🚘 ${t.vehicle}</span> • 
+              <span>👥 ${t.partner}</span>
+            </div>
+          </div>
+
+          <div style="text-align: right;">
+            <div style="font-size: 1.45rem; font-weight: 800; color: var(--bup-primary);">
+              ৳ ${t.grossTotal}
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">
+              ${t.role === 'driver' ? `Net Payout (90%): <strong>৳${driverNet}</strong>` : `Incl. 10% Platform Fee`}
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openDigitalReceiptModal('${t.id}')" style="margin-top: 6px; font-size: 0.76rem; padding: 4px 10px;">
+              🧾 View Receipt
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openDigitalReceiptModal(tripId) {
+  const trip = cachedHistoryTrips.find(t => String(t.id) === String(tripId)) || cachedHistoryTrips[0];
+  if (!trip) return;
+
+  const platformFee = Math.round(trip.grossTotal * 0.10);
+  const driverNet = trip.grossTotal - platformFee;
+
+  const existing = document.getElementById('bupgo-receipt-modal');
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'bupgo-receipt-modal';
+  backdrop.className = 'bupgo-calendar-modal-backdrop';
+
+  backdrop.innerHTML = `
+    <div class="bupgo-calendar-card" onclick="event.stopPropagation()" style="max-width: 440px;">
+      <div class="cal-card-header" style="background: linear-gradient(135deg, #064e3b 0%, #047857 100%);">
+        <div>
+          <h4>🧾 BUPGO Official Digital Receipt</h4>
+          <div class="cal-header-sub">Trip ID: #${String(trip.id).slice(-8).toUpperCase()} • Verified Carpool</div>
+        </div>
+        <button class="cal-close-btn" onclick="document.getElementById('bupgo-receipt-modal').remove()">&times;</button>
+      </div>
+
+      <div style="padding: 20px 22px; font-size: 0.88rem; color: var(--text-main);">
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; margin-bottom: 12px;">
+          <span style="color: var(--text-muted);">Trip Date & Time:</span>
+          <strong>${trip.travelDate} (${trip.time})</strong>
+        </div>
+
+        <div style="margin-bottom: 12px; background: var(--bg-main); padding: 10px 14px; border-radius: 8px;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">ROUTE DETAILS:</div>
+          <div style="font-weight: 800; font-size: 0.95rem; margin-top: 2px;">${trip.route}</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">Vehicle: ${trip.vehicle}</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">Gross Fare (${trip.seats} Seat(s)):</span>
+            <strong>৳ ${trip.grossTotal}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">BUPGO Platform Guarantee (10%):</span>
+            <span style="color: #ef4444;">- ৳ ${platformFee}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--border-color); font-size: 1.05rem;">
+            <span>${trip.role === 'driver' ? 'Driver Net Payout (90%):' : 'Passenger Paid Total:'}</span>
+            <strong style="color: var(--bup-primary); font-size: 1.25rem;">৳ ${trip.role === 'driver' ? driverNet : trip.grossTotal}</strong>
+          </div>
+        </div>
+
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 800; color: #047857;">🪙 Pathao-Style Loyalty Reward</div>
+            <div style="font-size: 0.75rem; color: #065f46;">5 Points = ৳1 BDT (Added to Wallet)</div>
+          </div>
+          <span class="badge badge-green" style="font-size: 0.85rem;">+10 Points</span>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Print Receipt</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('bupgo-receipt-modal').remove()">Done</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  backdrop.addEventListener('click', () => backdrop.remove());
+  document.body.appendChild(backdrop);
 }

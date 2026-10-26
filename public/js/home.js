@@ -146,71 +146,81 @@ function renderRideCard(ride) {
   const seatsLeft = ride.availableSeats;
   const isFull = seatsLeft <= 0;
   const rating = Number(ride.driverRating !== undefined ? ride.driverRating : 4.9);
+  const vehEmoji = ride.transportationType === 'Bike' ? '🏍️' : ride.transportationType === 'CNG' ? '🛺' : '🚗';
+  const vehAccent = ride.transportationType === 'Bike' ? 'var(--bup-gold)' : ride.transportationType === 'CNG' ? 'var(--bup-blue)' : 'var(--bup-primary)';
 
   return `
-    <div class="ride-card">
-      <div class="ride-card-top">
+    <div class="ride-card" style="border-top: 4px solid ${vehAccent}; position: relative;">
+      <div class="ride-card-top" style="align-items: flex-start;">
         <div class="driver-mini-info">
-          <img src="${ride.driverAvatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(ride.driverName)}" 
-               alt="${ride.driverName}" class="driver-mini-avatar">
+          <div style="position: relative;">
+            <img src="${ride.driverAvatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(ride.driverName)}" 
+                 alt="${ride.driverName}" class="driver-mini-avatar" style="border: 2px solid ${vehAccent};">
+            <span style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #10b981; border: 2px solid var(--bg-card); border-radius: 50%;"></span>
+          </div>
           <div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="driver-name-text">${ride.driverName}</span>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span class="driver-name-text" style="font-size: 1.05rem;">${ride.driverName}</span>
               <span class="badge ${rating >= 4.9 ? 'badge-yellow' : 'badge-green'}" style="font-size: 0.72rem; padding: 2px 7px;">
                 ⭐ ${rating.toFixed(1)} ${rating >= 4.9 ? 'Top Rated' : ''}
               </span>
+              <span class="badge badge-blue" style="font-size: 0.72rem; padding: 2px 7px;">
+                ${vehEmoji} ${ride.transportationType}
+              </span>
             </div>
-            <div class="driver-dept-text">${ride.driverDept} • ID: ${ride.driverStudentId} • ${ride.driverReviews || 18} rides</div>
+            <div class="driver-dept-text" style="margin-top: 2px;">
+              ${ride.driverDept} • ID: ${ride.driverStudentId} • ${ride.vehicleModel || 'Campus Carpool'}
+            </div>
           </div>
         </div>
 
         <div class="ride-fare-box">
-          <div class="fare-amount">৳ ${ride.estimatedCost}</div>
-          <div class="fare-per-seat">per student</div>
+          <div class="fare-amount" style="font-size: 1.6rem;">৳ ${ride.estimatedCost}</div>
+          <div class="fare-per-seat" style="font-weight: 700; color: var(--text-muted);">per seat</div>
+          <div style="font-size: 0.65rem; color: var(--bup-primary); font-weight: 700; margin-top: 2px;">🛡️ 10% Guarantee</div>
         </div>
       </div>
 
-      <div class="route-timeline">
-        <div class="route-point start">
-          <div class="route-point-label">Departure From</div>
-          <div class="route-point-name">${ride.startingLocation}</div>
+      <!-- Route Timeline -->
+      <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 16px; margin: 4px 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted);">Route & Time</span>
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--bup-primary);">📅 ${ride.travelDate}</span>
         </div>
-        <div class="route-point end">
-          <div class="route-point-label">Destination</div>
-          <div class="route-point-name">${ride.destination}</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; position: relative; padding-left: 22px;">
+          <div style="position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; border-left: 2px dashed #94a3b8;"></div>
+          <div>
+            <span style="position: absolute; left: -22px; top: 1px;">🟢</span>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Pickup:</div>
+            <div style="font-size: 0.92rem; font-weight: 800; color: var(--text-main);">${ride.startingLocation}</div>
+            <span class="badge badge-yellow" style="font-size: 0.68rem; padding: 1px 6px;">⏰ ${ride.departureTime}</span>
+          </div>
+          <div style="margin-top: 4px;">
+            <span style="position: absolute; left: -22px; top: 48px;">🏁</span>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Destination:</div>
+            <div style="font-size: 0.92rem; font-weight: 800; color: var(--text-main);">${ride.destination}</div>
+          </div>
         </div>
       </div>
 
-      <div class="ride-card-meta">
-        <div class="meta-item">
-          <span>📅 Date:</span>
-          <strong>${ride.travelDate}</strong>
-        </div>
-        <div class="meta-item">
-          <span>⏰ Time:</span>
-          <strong>${ride.departureTime}</strong>
-        </div>
-        <div class="meta-item">
-          <span>🚘 Type:</span>
-          <strong>${ride.transportationType}</strong>
-        </div>
-        <div class="meta-item">
-          <span>🪑 Seats:</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span>💺 <strong>Seats:</strong></span>
           <span class="badge ${isFull ? 'badge-red' : 'badge-green'}">
-            ${isFull ? 'Full' : `${seatsLeft} available`}
+            ${isFull ? 'Full (0 Left)' : `${seatsLeft} of ${ride.totalSeats} seats left`}
           </span>
         </div>
+        <div style="color: var(--text-muted); font-size: 0.76rem;">
+          <em>${ride.additionalInfo || 'BUP Commute'}</em>
+        </div>
       </div>
 
-      <div class="ride-card-actions">
-        <span style="font-size: 0.85rem; color: var(--text-muted); font-style: italic;">
-          "${ride.additionalInfo || 'BUP Student Commute'}"
-        </span>
-        <a href="find-ride.html?rideId=${ride._id}" class="btn btn-primary btn-sm">
-          <span>View & Request</span>
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
+      <div class="ride-card-actions" style="margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="openLiveRideTracker({ startLoc: '${ride.startingLocation.replace(/'/g, "\\'")}', destLoc: '${ride.destination.replace(/'/g, "\\'")}', driverName: '${ride.driverName.replace(/'/g, "\\'")}', driverAvatar: '${ride.driverAvatar || ''}', vehicleType: '${ride.transportationType}', vehicleModel: '${(ride.vehicleModel || '').replace(/'/g, "\\'")}', fare: ${ride.estimatedCost} })" style="display: inline-flex; align-items: center; gap: 4px;">
+          <span>🗺️ Map & Track</span>
+        </button>
+        <a href="find-ride.html?rideId=${ride._id}" class="btn btn-primary btn-sm" style="font-weight: 700;">
+          <span>Request Seat ➔</span>
         </a>
       </div>
     </div>

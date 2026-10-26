@@ -149,7 +149,7 @@ async function loadRides() {
 
     if (currentRides.length === 0) {
       container.innerHTML = `
-        <div style="text-align: center; padding: 50px; background: #ffffff; border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+        <div style="text-align: center; padding: 50px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
           <div style="font-size: 2.5rem; margin-bottom: 12px;">🚗</div>
           <h3 style="font-size: 1.2rem; margin-bottom: 8px;">No matching rides found</h3>
           <p style="color: var(--text-muted); margin-bottom: 20px;">Try adjusting your search filters or be the first to offer a carpool on this route!</p>
@@ -166,75 +166,101 @@ async function loadRides() {
       const isOwnRide = currentUser && String(currentUser.id) === String(ride.driverId);
       const rating = Number(ride.driverRating !== undefined ? ride.driverRating : 4.9);
 
+      const vehEmoji = ride.transportationType === 'Bike' ? '🏍️' : ride.transportationType === 'CNG' ? '🛺' : '🚗';
+      const vehAccent = ride.transportationType === 'Bike' ? 'var(--bup-gold)' : ride.transportationType === 'CNG' ? 'var(--bup-blue)' : 'var(--bup-primary)';
+
       return `
-        <div class="ride-card">
-          <div class="ride-card-top">
+        <div class="ride-card" style="border-top: 4px solid ${vehAccent}; position: relative; overflow: hidden;">
+          <!-- Top Driver & Vehicle Header -->
+          <div class="ride-card-top" style="align-items: flex-start;">
             <div class="driver-mini-info">
-              <img src="${ride.driverAvatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(ride.driverName)}" 
-                   alt="${ride.driverName}" class="driver-mini-avatar">
+              <div style="position: relative;">
+                <img src="${ride.driverAvatar || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(ride.driverName)}" 
+                     alt="${ride.driverName}" class="driver-mini-avatar" style="border: 2px solid ${vehAccent};">
+                <span style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: #10b981; border: 2px solid var(--bg-card); border-radius: 50%;"></span>
+              </div>
               <div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span class="driver-name-text">${ride.driverName}</span>
-                  <span class="badge ${rating >= 4.9 ? 'badge-yellow' : 'badge-green'}" style="font-size: 0.75rem; padding: 2px 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span class="driver-name-text" style="font-size: 1.05rem;">${ride.driverName}</span>
+                  <span class="badge ${rating >= 4.9 ? 'badge-yellow' : 'badge-green'}" style="font-size: 0.72rem; padding: 2px 7px;">
                     ⭐ ${rating.toFixed(1)} ${rating >= 4.9 ? 'Top Rated' : ''}
                   </span>
+                  <span class="badge badge-blue" style="font-size: 0.72rem; padding: 2px 7px;">
+                    ${vehEmoji} ${ride.transportationType}
+                  </span>
                 </div>
-                <div class="driver-dept-text">${ride.driverDept} • ID: ${ride.driverStudentId} • <span>${ride.driverReviews || 15} rides</span></div>
+                <div class="driver-dept-text" style="margin-top: 2px;">
+                  <span>${ride.driverDept}</span> • 
+                  <span>ID: ${ride.driverStudentId}</span> • 
+                  <span>${ride.vehicleModel || 'Standard Campus Model'}</span>
+                </div>
               </div>
             </div>
 
+            <!-- Price Box with 10% Guarantee -->
             <div class="ride-fare-box">
-              <div class="fare-amount">৳ ${ride.estimatedCost}</div>
-              <div class="fare-per-seat">per seat</div>
+              <div class="fare-amount" style="font-size: 1.7rem;">৳ ${ride.estimatedCost}</div>
+              <div class="fare-per-seat" style="font-weight: 700; color: var(--text-muted);">per seat</div>
+              <div style="font-size: 0.68rem; color: var(--bup-primary); font-weight: 700; margin-top: 2px;">🛡️ 10% Platform Guarantee</div>
             </div>
           </div>
 
-          <div class="route-timeline">
-            <div class="route-point start">
-              <div class="route-point-label">From Pickup Point</div>
-              <div class="route-point-name">${ride.startingLocation}</div>
+          <!-- Creative Journey Timeline (Pathao / Uber Inspired) -->
+          <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 16px; margin: 4px 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Trip Route & Schedule</span>
+              <span style="font-size: 0.75rem; font-weight: 700; color: var(--bup-primary);">📅 ${ride.travelDate}</span>
             </div>
-            <div class="route-point end">
-              <div class="route-point-label">To Destination</div>
-              <div class="route-point-name">${ride.destination}</div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; position: relative; padding-left: 24px;">
+              <div style="position: absolute; left: 6px; top: 8px; bottom: 8px; width: 2px; background: dashed var(--border-color); border-left: 2px dashed #94a3b8;"></div>
+              
+              <!-- Pickup -->
+              <div style="position: relative;">
+                <span style="position: absolute; left: -24px; top: 2px; font-size: 0.85rem;">🟢</span>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Pickup Spot</div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">${ride.startingLocation}</div>
+                <span class="badge badge-yellow" style="font-size: 0.7rem; padding: 1px 6px; margin-top: 2px;">⏰ Departs: ${ride.departureTime}</span>
+              </div>
+
+              <!-- Destination -->
+              <div style="position: relative;">
+                <span style="position: absolute; left: -24px; top: 2px; font-size: 0.85rem;">🏁</span>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Campus Destination</div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-main);">${ride.destination}</div>
+              </div>
             </div>
           </div>
 
-          <div class="ride-card-meta">
-            <div class="meta-item">
-              <span>📅 Date:</span>
-              <strong>${ride.travelDate}</strong>
-            </div>
-            <div class="meta-item">
-              <span>⏰ Departure:</span>
-              <strong>${ride.departureTime}</strong>
-            </div>
-            <div class="meta-item">
-              <span>🚘 Vehicle:</span>
-              <strong>${ride.transportationType} (${ride.vehicleModel || 'Standard'})</strong>
-            </div>
-            <div class="meta-item">
-              <span>🪑 Available:</span>
-              <span class="badge ${isFull ? 'badge-red' : 'badge-green'}">
+          <!-- Seat Capacity & Comfort Pill -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.82rem;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>💺 <strong>Seat Availability:</strong></span>
+              <span class="badge ${isFull ? 'badge-red' : 'badge-green'}" style="font-size: 0.78rem;">
                 ${isFull ? 'Full (0 Left)' : `${seatsLeft} of ${ride.totalSeats} seats left`}
               </span>
             </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">
+              💬 <em>${ride.additionalInfo || 'BUP students carpool commute'}</em>
+            </div>
           </div>
 
-          <div style="font-size: 0.88rem; color: var(--text-muted); background: #fdfdfd; padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid #f1f5f9;">
-            <strong>Note:</strong> ${ride.additionalInfo || 'BUP Student Commute.'}
-          </div>
-
-          <div class="ride-card-actions">
-            <button class="btn btn-secondary btn-sm" onclick="openRideDetails('${ride._id}')">
-              <span>View Full Details</span>
-            </button>
+          <!-- Action Buttons Bar -->
+          <div class="ride-card-actions" style="margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap;">
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openLiveRideTracker({ startLoc: '${ride.startingLocation.replace(/'/g, "\\'")}', destLoc: '${ride.destination.replace(/'/g, "\\'")}', driverName: '${ride.driverName.replace(/'/g, "\\'")}', driverAvatar: '${ride.driverAvatar || ''}', vehicleType: '${ride.transportationType}', vehicleModel: '${(ride.vehicleModel || '').replace(/'/g, "\\'")}', fare: ${ride.estimatedCost} })" style="display: inline-flex; align-items: center; gap: 4px;">
+                <span>🗺️ Live Route & Map</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openRideDetails('${ride._id}')">
+                <span>Details</span>
+              </button>
+            </div>
 
             ${isOwnRide ? `
-              <span class="badge badge-purple" style="font-size: 0.85rem; padding: 6px 12px;">Your Ride Post</span>
+              <span class="badge badge-purple" style="font-size: 0.85rem; padding: 6px 12px; align-self: center;">Your Ride Post</span>
             ` : `
-              <button class="btn btn-primary btn-sm" onclick="openRequestModal('${ride._id}')" ${isFull ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
-                <span>${isFull ? 'Ride Full' : 'Request Seat →'}</span>
+              <button type="button" class="btn btn-primary btn-sm" onclick="openRequestModal('${ride._id}')" ${isFull ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''} style="font-weight: 700;">
+                <span>${isFull ? 'Ride Full' : 'Request Seat ➔'}</span>
               </button>
             `}
           </div>
@@ -277,11 +303,23 @@ function openRequestModal(rideId) {
 
   const updateModalFareText = () => {
     const seats = parseInt(seatSelect.value || 1, 10);
-    const total = costPerSeat * seats;
+    const subtotal = costPerSeat * seats;
+    
+    // Milestone loyalty discount calculation (Requirement 6)
+    const discountRate = 0.50; // 50% Milestone Reward
+    const discountAmount = Math.round(subtotal * discountRate);
+    const finalTotal = subtotal - discountAmount;
+
     const calcEl = document.getElementById('modal-fare-calc-text');
-    if (calcEl) calcEl.textContent = `${seats} Seat${seats > 1 ? 's' : ''} × ৳ ${costPerSeat} = ৳ ${total}`;
+    if (calcEl) {
+      calcEl.innerHTML = `
+        <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.85rem;">৳ ${subtotal}</span>
+        <span style="color: var(--bup-primary); font-size: 1.1rem; margin-left: 6px; font-weight: 800;">৳ ${finalTotal}</span>
+        <span class="badge badge-green" style="font-size: 0.7rem; margin-left: 6px;">50% Milestone OFF</span>
+      `;
+    }
     const btn = document.getElementById('btn-submit-request');
-    if (btn) btn.textContent = `Confirm & Send Join Request — ৳ ${total}`;
+    if (btn) btn.textContent = `Confirm & Send Join Request — ৳ ${finalTotal}`;
   };
 
   seatSelect.onchange = updateModalFareText;
@@ -305,6 +343,15 @@ function openRequestModal(rideId) {
       <div style="font-size: 0.76rem; color: var(--bup-primary);">
         ${snapshot ? `Formula: ৳${snapshot.rates.baseFare} Base + (${snapshot.distanceKm}km × ৳${snapshot.rates.perKmRate}) • 🛡️ 3 mins free waiting time included` : 'Formula: Base Fare + Distance Rate (Authoritative BUPGO Central Store) • 🛡️ 3 mins free waiting included'}
       </div>
+    </div>
+
+    <!-- Milestone Loyalty & Points Banner (Requirements 6 & 7) -->
+    <div style="margin-top: 10px; background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; border-radius: var(--radius-sm); padding: 9px 12px; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+      <div>
+        <strong style="color: var(--bup-primary);">🎉 50% Milestone Loyalty Reward Applied!</strong>
+        <div style="color: var(--text-muted); font-size: 0.72rem;">Driver receives 100% full payout (subsidized by BUPGO Platform Owner).</div>
+      </div>
+      <span class="badge badge-yellow" style="font-size: 0.72rem;">🪙 +10 Pts on Completion</span>
     </div>
   `;
 
@@ -378,7 +425,7 @@ async function openRideDetails(rideId) {
 
       <div style="margin-bottom: 20px;">
         <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;">Ride Guidelines & Notes:</h4>
-        <p style="font-size: 0.9rem; color: var(--text-muted); background: #fdfdfd; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+        <p style="font-size: 0.9rem; color: var(--text-muted); background: var(--bg-card); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
           ${ride.additionalInfo || 'Please arrive 5 minutes before departure at the designated spot.'}
         </p>
       </div>
@@ -390,7 +437,7 @@ async function openRideDetails(rideId) {
         ${passengers.length > 0 ? `
           <div style="display: flex; flex-direction: column; gap: 6px;">
             ${passengers.map(p => `
-              <div style="background: #f1f5f9; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; display: flex; justify-content: space-between;">
+              <div style="background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; display: flex; justify-content: space-between;">
                 <span>👤 <strong>${p.riderName}</strong> (${p.riderDept})</span>
                 <span class="badge badge-green">${p.seatsRequested} Seat(s) Booked</span>
               </div>

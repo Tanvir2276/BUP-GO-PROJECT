@@ -62,10 +62,7 @@ function toggleUserDropdown(e) {
 
 function handleSignOut() {
   Auth.clearSession();
-  showToast('Logged out successfully.', 'info');
-  setTimeout(() => {
-    window.location.href = 'index.html';
-  }, 500);
+  window.location.href = 'index.html';
 }
 
 // Notification Drawer & Preference Management
@@ -552,10 +549,7 @@ function renderNavbar() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       Auth.clearSession();
-      showToast('Logged out successfully.', 'info');
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 500);
+      window.location.href = 'index.html';
     });
   }
 

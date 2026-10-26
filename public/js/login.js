@@ -23,17 +23,13 @@ function toggleAuthTab(mode) {
 
 async function quickLogin(loginId, password) {
   try {
-    showToast('Logging in...', 'info');
     const res = await apiRequest('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ loginId, password })
     });
 
     Auth.setSession(res.token, res.user);
-    showToast(`Welcome, ${res.user.name}!`, 'success');
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 700);
+    window.location.href = 'index.html';
   } catch (err) {
     showToast(err.message || 'Login failed', 'error');
   }
@@ -42,8 +38,7 @@ async function quickLogin(loginId, password) {
 document.addEventListener('DOMContentLoaded', () => {
   // If already logged in, redirect
   if (Auth.isLoggedIn()) {
-    const user = Auth.getUser();
-    showToast(`Already logged in as ${user.name}`, 'info');
+    window.location.href = 'index.html';
   }
 
   // Handle Login form
@@ -66,10 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         Auth.setSession(res.token, res.user);
-        showToast(res.message || 'Login successful!', 'success');
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 700);
+        window.location.href = 'index.html';
       } catch (err) {
         showToast(err.message || 'Invalid credentials', 'error');
         loginSubmit.disabled = false;

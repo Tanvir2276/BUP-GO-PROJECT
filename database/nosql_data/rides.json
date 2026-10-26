@@ -1,5 +1,54 @@
 [
   {
+    "_id": "6adf80cafee1b91aa5e9c085",
+    "createdAt": "2026-10-26T16:33:14.095Z",
+    "updatedAt": "2026-10-26T16:36:32.780Z",
+    "driverId": "6adccc7f7839a3f3caa059dc",
+    "driverName": "jabenNakimama",
+    "driverStudentId": "2254901091",
+    "driverDept": "ICT (ICE)",
+    "driverPhone": "01711998877",
+    "driverAvatar": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80",
+    "driverRating": 4.95,
+    "driverReviews": 42,
+    "tripType": "to_campus",
+    "startingLocation": "Mirpur DOHS (Gate 2)",
+    "destination": "BUP Campus (Main Gate)",
+    "travelDate": "2026-10-27",
+    "departureTime": "08:00 AM",
+    "totalSeats": 3,
+    "availableSeats": 2,
+    "transportationType": "Car",
+    "vehicleModel": "Toyota Premio (Dhaka Metro Ga 28-9012)",
+    "estimatedCost": 78,
+    "fareSnapshot": {
+      "vehicleType": "Car",
+      "vehicleDisplayName": "Personal Car",
+      "city": "nationwide",
+      "distanceKm": 1.4,
+      "waitingMinutes": 0,
+      "freeWaitingMinutes": 3,
+      "chargeableWaitingMinutes": 0,
+      "rates": {
+        "baseFare": 50,
+        "perKmRate": 20,
+        "waitingChargePerMin": 1.5
+      },
+      "breakdown": {
+        "baseFareFormatted": "৳50",
+        "distanceCostFormatted": "৳28",
+        "waitingCostFormatted": "৳0",
+        "formula": "৳50 (Base) + (1.4 km × ৳20) + (0 min chargeable × ৳1.5)"
+      },
+      "totalFare": 78,
+      "currency": "৳",
+      "calculatedAt": "2026-10-26T16:33:14.093Z"
+    },
+    "status": "completed",
+    "additionalInfo": "Commuting to/from BUP Campus.",
+    "__v": 0
+  },
+  {
     "_id": "6adf1802b81adaa40df4c041",
     "createdAt": "2026-10-26T09:06:10.452Z",
     "updatedAt": "2026-10-26T09:07:51.278Z",
@@ -51,7 +100,7 @@
   {
     "_id": "c58001b631d5690124a6f95f",
     "createdAt": "2026-10-23T15:49:39.947Z",
-    "updatedAt": "2026-10-26T10:57:50.787Z",
+    "updatedAt": "2026-10-26T17:12:36.052Z",
     "driverId": "4474a028e950f753e450ee3f",
     "driverName": "Sulayman Akhand Rahul",
     "driverStudentId": "2354900901014",
@@ -123,7 +172,7 @@
   {
     "_id": "9ff9d773c351afae07dec01c",
     "createdAt": "2026-10-23T15:49:39.945Z",
-    "updatedAt": "2026-10-23T15:49:39.945Z",
+    "updatedAt": "2026-10-26T16:37:24.113Z",
     "driverId": "0f860b2a3a6e8af99d02522d",
     "driverName": "Munshi Tanvir Hossain",
     "driverStudentId": "2254901076",
@@ -141,8 +190,8 @@
     "estimatedCost": 40,
     "status": "active",
     "additionalInfo": "Air conditioned car. Leaving sharp at 7:45 AM from Mirpur 10 roundabout. Only BUP students welcome.",
-    "driverRating": 5,
-    "driverReviews": 28
+    "driverRating": 3,
+    "driverReviews": 1
   },
   {
     "_id": "7c0edcca282a1f91debaf8ea",

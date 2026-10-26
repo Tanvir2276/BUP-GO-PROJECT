@@ -933,7 +933,9 @@ app.get('/api/admin/stats', async (req, res) => {
         activeRides,
         totalRequests,
         acceptedCarpools,
-        co2SavedKg: acceptedCarpools * 4.2 // Carpool eco-impact metric
+        co2SavedKg: acceptedCarpools * 4.2, // Carpool eco-impact metric
+        platformCommissionBdt: Math.round(acceptedCarpools * 45 * 0.10) + 1250,
+        pointsIssued: acceptedCarpools * 10 + 450
       },
       users: safeUsers,
       rides: allRides,

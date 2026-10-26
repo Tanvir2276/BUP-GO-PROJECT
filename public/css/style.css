@@ -585,6 +585,11 @@ input, select, textarea {
   text-decoration: none;
   transition: var(--transition);
   cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
 }
 
 .user-dropdown-link-item:hover {
@@ -1453,8 +1458,12 @@ body.dark-mode .dropdown-user-name {
   color: #f8fafc;
 }
 
+body.dark-mode .user-dropdown-link-item {
+  background: transparent !important;
+}
+
 body.dark-mode .user-dropdown-link-item:hover {
-  background: #192b3e;
+  background: #192b3e !important;
 }
 
 body.dark-mode .dropdown-link-title {

@@ -95,7 +95,7 @@ function renderCalendarModal() {
     <div class="bupgo-calendar-card" onclick="event.stopPropagation()">
       <div class="cal-card-header">
         <div class="cal-header-title">
-          <h4>📅 Universal Calendar</h4>
+          <h4>📅 Calendar</h4>
           <div class="cal-header-sub">Select pickup / departure date</div>
         </div>
         <button class="cal-close-btn" onclick="closeUniversalCalendar()">&times;</button>

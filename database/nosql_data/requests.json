@@ -1,5 +1,63 @@
 [
   {
+    "_id": "6adf87abfee1b91aa5e9c08e",
+    "createdAt": "2026-10-26T17:02:35.379Z",
+    "updatedAt": "2026-10-26T17:02:35.379Z",
+    "rideId": "6adccc7f7839a3f3caa05bac",
+    "riderId": "e68507687916cc4a67ba8262",
+    "riderName": "BUP System Administrator",
+    "riderStudentId": "BUP-ADMIN-01",
+    "riderDept": "ICT Laboratory Admin",
+    "riderPhone": "01700000000",
+    "seatsRequested": 1,
+    "pickupLocation": "BUP Campus (Main Gate)",
+    "notes": "",
+    "status": "pending",
+    "fareSnapshot": null,
+    "totalEstimatedPrice": 45,
+    "__v": 0
+  },
+  {
+    "_id": "6adf8143fee1b91aa5e9c087",
+    "createdAt": "2026-10-26T16:35:15.991Z",
+    "updatedAt": "2026-10-26T16:36:28.508Z",
+    "rideId": "6adf80cafee1b91aa5e9c085",
+    "riderId": "1928cde9857d68110315939e",
+    "riderName": "Fatima Zahra",
+    "riderStudentId": "2254901045",
+    "riderDept": "Computer Science & Engineering",
+    "riderPhone": "01655667788",
+    "seatsRequested": 1,
+    "pickupLocation": "Mirpur DOHS (Gate 2)",
+    "notes": "",
+    "status": "accepted",
+    "fareSnapshot": {
+      "vehicleType": "Car",
+      "vehicleDisplayName": "Personal Car",
+      "city": "nationwide",
+      "distanceKm": 1.4,
+      "waitingMinutes": 0,
+      "freeWaitingMinutes": 3,
+      "chargeableWaitingMinutes": 0,
+      "rates": {
+        "baseFare": 50,
+        "perKmRate": 20,
+        "waitingChargePerMin": 1.5
+      },
+      "breakdown": {
+        "baseFareFormatted": "৳50",
+        "distanceCostFormatted": "৳28",
+        "waitingCostFormatted": "৳0",
+        "formula": "৳50 (Base) + (1.4 km × ৳20) + (0 min chargeable × ৳1.5)"
+      },
+      "totalFare": 78,
+      "currency": "৳",
+      "calculatedAt": "2026-10-26T16:33:14.093Z"
+    },
+    "totalEstimatedPrice": 78,
+    "__v": 0
+  },
+  {
     "_id": "6adf1846b81adaa40df4c043",
     "createdAt": "2026-10-26T09:07:18.466Z",
     "updatedAt": "2026-10-26T09:07:46.040Z",

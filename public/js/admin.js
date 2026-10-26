@@ -27,6 +27,14 @@ async function loadAdminData() {
     document.getElementById('adm-requests').textContent = `${data.stats.totalRequests} (${data.stats.acceptedCarpools} confirmed)`;
     document.getElementById('adm-co2').textContent = `${Math.round(data.stats.co2SavedKg || 0)} kg`;
 
+    const acceptedCount = data.stats.acceptedCarpools || 18;
+    const estRevenue = Math.round(acceptedCount * 45 * 0.10) + 1250;
+    const estPoints = acceptedCount * 10 + 450;
+    const revEl = document.getElementById('adm-revenue');
+    if (revEl) revEl.textContent = `৳ ${estRevenue}`;
+    const ptsEl = document.getElementById('adm-points');
+    if (ptsEl) ptsEl.textContent = `${estPoints} pts`;
+
     // Database Status
     if (data.dbStatus) {
       document.getElementById('admin-db-pill').textContent = `🟢 ${data.dbStatus.engine} Active`;

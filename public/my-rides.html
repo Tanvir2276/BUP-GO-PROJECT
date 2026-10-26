@@ -36,28 +36,38 @@
         <span>🎫 Rides I Requested (Passenger)</span>
         <span class="requests-badge-count" id="badge-requested-count" style="background: var(--bup-blue);">0</span>
       </button>
+
+      <button class="tab-btn" id="tab-history-btn" onclick="switchTab('history')">
+        <span>📜 Ride History & Points</span>
+        <span class="requests-badge-count" id="badge-history-count" style="background: #10b981;">0</span>
+      </button>
     </div>
 
     <!-- Tab 1: Offered Rides (Driver View) -->
     <div id="panel-posted" class="tab-panel">
-      <!-- Driver Carpool Earnings & Summary Strip (Pathao / Uber Inspired) -->
-      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; box-shadow: var(--shadow-sm);">
+      <!-- Driver Carpool Earnings & Summary Strip (10% Platform Commission breakdown) -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 15px; box-shadow: var(--shadow-sm);">
         <div>
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">💰 Fuel Cost Shared / Saved</span>
-          <h3 style="font-size: 1.6rem; color: var(--bup-primary); font-weight: 800; margin-top: 2px;" id="driver-total-earnings">৳ 0</h3>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">💰 Gross Fare Collected</span>
+          <h3 style="font-size: 1.5rem; color: var(--text-main); font-weight: 800; margin-top: 2px;" id="driver-total-earnings">৳ 0</h3>
         </div>
         <div>
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">👥 Co-Passengers Transported</span>
-          <h3 style="font-size: 1.6rem; color: var(--bup-gold); font-weight: 800; margin-top: 2px;" id="driver-total-passengers">0</h3>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">💼 Owner Commission (10%)</span>
+          <h3 style="font-size: 1.5rem; color: #ef4444; font-weight: 800; margin-top: 2px;" id="driver-platform-fee">৳ 0</h3>
         </div>
         <div>
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🌱 Campus Carbon Saved</span>
-          <h3 style="font-size: 1.6rem; color: #16a34a; font-weight: 800; margin-top: 2px;" id="driver-carbon-saved">0 kg</h3>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">💵 Driver Net Payout (90%)</span>
+          <h3 style="font-size: 1.5rem; color: var(--bup-primary); font-weight: 800; margin-top: 2px;" id="driver-net-earnings">৳ 0</h3>
         </div>
         <div>
-          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">⭐ Your Driver Rating</span>
-          <h3 style="font-size: 1.6rem; color: #f59e0b; font-weight: 800; margin-top: 2px;">5.0 <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">(Top Rated)</span></h3>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">👥 Co-Passengers Transported</span>
+          <h3 style="font-size: 1.5rem; color: var(--bup-gold); font-weight: 800; margin-top: 2px;" id="driver-total-passengers">0</h3>
         </div>
+        <div>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🌱 Campus Carbon Saved</span>
+          <h3 style="font-size: 1.5rem; color: #16a34a; font-weight: 800; margin-top: 2px;" id="driver-carbon-saved">0 kg</h3>
+        </div>
+      </div>
       </div>
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -75,6 +85,30 @@
 
     <!-- Tab 2: Requested Rides (Passenger View) -->
     <div id="panel-requested" class="tab-panel" style="display: none;">
+      <!-- Passenger Loyalty & Pathao-Style Points Strip (Requirements 6 & 7) -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; box-shadow: var(--shadow-sm);">
+        <div>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🪙 BUPGO Points (10 pts/trip)</span>
+          <h3 style="font-size: 1.5rem; color: #f59e0b; font-weight: 800; margin-top: 2px;" id="passenger-points-val">50 pts</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Rate: 5 pts = ৳1 BDT (Worth ৳10 BDT)</span>
+        </div>
+        <div>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🎁 Milestone Loyalty Status</span>
+          <h3 style="font-size: 1.35rem; color: var(--bup-primary); font-weight: 800; margin-top: 2px;" id="passenger-milestone-val">Eligible for 50% OFF</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">20/50 rides: 50% OFF • 100 rides: 100% FREE</span>
+        </div>
+        <div>
+          <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">💰 Total Commute Savings</span>
+          <h3 style="font-size: 1.5rem; color: #10b981; font-weight: 800; margin-top: 2px;" id="passenger-savings-val">৳ 450</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Shared vs solo commercial fare</span>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="convertPointsToWallet()" style="font-weight: 700; width: 100%;">
+            🔄 Convert Points to Wallet BDT
+          </button>
+        </div>
+      </div>
+
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="font-size: 1.2rem; font-weight: 700;">My Ride Requests</h3>
         <a href="find-ride.html" class="btn btn-secondary btn-sm">Find More Rides</a>
@@ -84,6 +118,28 @@
         <!-- Dynamically rendered -->
         <div style="text-align: center; padding: 40px; color: var(--text-muted);">
           Loading your ride requests...
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Complete Ride History (Both Passenger & Driver - Requirement 8) -->
+    <div id="panel-history" class="tab-panel" style="display: none;">
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: var(--shadow-sm);">
+        <div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main);">📜 Complete Carpool History</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Archive of all past completed carpools, earned points, and digital receipts.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="filterHistory('all')" id="btn-hist-all">All Trips</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="filterHistory('driver')" id="btn-hist-driver">Driver Trips</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="filterHistory('passenger')" id="btn-hist-passenger">Passenger Trips</button>
+        </div>
+      </div>
+
+      <div class="rides-list-container" id="history-rides-list">
+        <!-- Dynamically rendered -->
+        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+          Loading your ride history...
         </div>
       </div>
     </div>

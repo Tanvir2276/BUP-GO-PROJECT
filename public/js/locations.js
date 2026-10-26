@@ -398,6 +398,7 @@ function setupCustomLocationPopup(inputEl) {
   inputEl.dataset.hasLocationPopup = 'true';
 
   let popup = null;
+  let isSelecting = false;
 
   function createPopup() {
     if (popup) return popup;
@@ -460,15 +461,25 @@ function setupCustomLocationPopup(inputEl) {
     popup.querySelectorAll('.loc-popup-item').forEach(item => {
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        isSelecting = true;
         inputEl.value = item.getAttribute('data-val');
-        popup.style.display = 'none';
+        if (popup) popup.style.display = 'none';
         inputEl.dispatchEvent(new Event('input', { bubbles: true }));
         inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+        setTimeout(() => {
+          isSelecting = false;
+          if (popup) popup.style.display = 'none';
+        }, 150);
       });
     });
   }
 
   inputEl.addEventListener('input', () => {
+    if (isSelecting) {
+      if (popup) popup.style.display = 'none';
+      return;
+    }
     const val = inputEl.value.trim();
     if (val.length >= 1) {
       const matches = filterLocations(val);
@@ -479,6 +490,7 @@ function setupCustomLocationPopup(inputEl) {
   });
 
   inputEl.addEventListener('focus', () => {
+    if (isSelecting) return;
     const val = inputEl.value.trim();
     if (val.length >= 1) {
       renderSuggestions(filterLocations(val));
@@ -489,6 +501,20 @@ function setupCustomLocationPopup(inputEl) {
     setTimeout(() => {
       if (popup) popup.style.display = 'none';
     }, 200);
+  });
+
+  inputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && popup) {
+      popup.style.display = 'none';
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (popup && popup.style.display !== 'none') {
+      if (!popup.contains(e.target) && e.target !== inputEl) {
+        popup.style.display = 'none';
+      }
+    }
   });
 
   window.addEventListener('resize', positionPopup);
