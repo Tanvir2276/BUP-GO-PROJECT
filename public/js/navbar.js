@@ -18,7 +18,7 @@ function toggleTheme() {
   const isDark = document.body.classList.toggle('dark-mode');
   localStorage.setItem('bupgo_theme', isDark ? 'dark' : 'light');
   updateThemeIcon(isDark);
-  showToast(`Switched to ${isDark ? 'Night / Dark' : 'Light'} Mode`, 'info');
+  // Silent smooth toggle without annoying toast message (User Request 2)
 }
 
 function updateThemeIcon(isDark) {

@@ -1016,6 +1016,10 @@ body.dark-mode .page-header-band {
    COMPREHENSIVE DARK MODE & CONTRAST STYLING FOR ALL PAGES
    ========================================================= */
 body.dark-mode {
+  --bup-primary: #34d399 !important;
+  --bup-primary-dark: #10b981 !important;
+  --bup-primary-light: #6ee7b7 !important;
+  --bup-primary-soft: rgba(16, 185, 129, 0.16) !important;
   --bg-main: #0b1320;
   --bg-card: #131f2f;
   --text-main: #f8fafc;

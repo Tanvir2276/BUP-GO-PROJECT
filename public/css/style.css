@@ -1301,6 +1301,10 @@ textarea.form-control {
    NIGHT / DARK MODE STYLES
    ========================================================= */
 body.dark-mode {
+  --bup-primary: #34d399 !important;
+  --bup-primary-dark: #10b981 !important;
+  --bup-primary-light: #6ee7b7 !important;
+  --bup-primary-soft: rgba(16, 185, 129, 0.16) !important;
   --bg-main: #0a1118;
   --bg-card: #131f2d;
   --text-main: #f1f5f9;
@@ -1544,4 +1548,111 @@ body.dark-mode .notif-message-text {
   0% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.25); }
   50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.55); }
   100% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.25); }
+}
+
+/* =========================================================
+   DARK MODE LUMINOUS GREEN & HIGH CONTRAST SYSTEM
+   ========================================================= */
+body.dark-mode [style*="color: var(--bup-primary)"],
+body.dark-mode [style*="color:var(--bup-primary)"],
+body.dark-mode [style*="color: var(--bup-primary-dark)"],
+body.dark-mode [style*="color:var(--bup-primary-dark)"],
+body.dark-mode [style*="color: #00482b"],
+body.dark-mode [style*="color:#00482b"],
+body.dark-mode [style*="color: #00683f"],
+body.dark-mode [style*="color:#00683f"],
+body.dark-mode [style*="color: #046a38"],
+body.dark-mode [style*="color:#046a38"],
+body.dark-mode [style*="color: #16a34a"],
+body.dark-mode [style*="color:#16a34a"],
+body.dark-mode [style*="color: #15803d"],
+body.dark-mode [style*="color:#15803d"],
+body.dark-mode [style*="color: #047857"],
+body.dark-mode [style*="color:#047857"] {
+  color: #34d399 !important;
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.45) !important;
+}
+
+body.dark-mode #home-fare-val,
+body.dark-mode #fare-total-display,
+body.dark-mode #home-formula-val,
+body.dark-mode #fare-formula-display,
+body.dark-mode #driver-total-earnings,
+body.dark-mode #driver-carbon-saved,
+body.dark-mode #adm-students,
+body.dark-mode #adm-co2,
+body.dark-mode #example-bike,
+body.dark-mode #example-car,
+body.dark-mode #example-cng,
+body.dark-mode #modal-fare-calc-text,
+body.dark-mode .price-val {
+  color: #34d399 !important;
+  text-shadow: 0 0 16px rgba(52, 211, 153, 0.6) !important;
+}
+
+body.dark-mode .badge-green {
+  background-color: rgba(16, 185, 129, 0.22) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(52, 211, 153, 0.45) !important;
+  text-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+  font-weight: 700 !important;
+}
+
+body.dark-mode .badge-yellow {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+body.dark-mode .badge-blue {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(96, 165, 250, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+body.dark-mode .badge-red {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+body.dark-mode .badge-purple {
+  background-color: rgba(168, 85, 247, 0.2) !important;
+  color: #c084fc !important;
+  border: 1px solid rgba(192, 132, 252, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+body.dark-mode .btn-primary {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+}
+
+body.dark-mode .btn-primary:hover {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
+  color: #042f1a !important;
+  box-shadow: 0 6px 20px rgba(52, 211, 153, 0.55) !important;
+}
+
+body.dark-mode .tabs-nav {
+  border-bottom-color: #1e3148;
+}
+
+body.dark-mode .tab-btn {
+  color: #94a3b8;
+}
+
+body.dark-mode .tab-btn:hover {
+  color: #f1f5f9;
+}
+
+body.dark-mode .tab-btn.active {
+  color: #34d399 !important;
+  border-bottom-color: #34d399 !important;
+  text-shadow: 0 0 12px rgba(52, 211, 153, 0.35);
 }

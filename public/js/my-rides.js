@@ -35,6 +35,21 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  const user = Auth.getUser();
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetTab = urlParams.get('tab');
+
+  // Role-aware tab display (Requirement 3 & 4)
+  if (targetTab === 'requested') {
+    switchTab('requested');
+  } else if (targetTab === 'posted') {
+    switchTab('posted');
+  } else if (user && user.role === 'passenger') {
+    switchTab('requested'); // Passengers default to requested rides view
+  } else {
+    switchTab('posted'); // Drivers default to offered rides view
+  }
+
   loadMyRides();
 });
 
@@ -82,7 +97,7 @@ async function loadMyRides() {
 function renderPostedRides(rides, container) {
   if (!rides || rides.length === 0) {
     container.innerHTML = `
-      <div style="text-align: center; padding: 50px; background: #ffffff; border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+      <div style="text-align: center; padding: 50px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
         <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 16px;">You haven't posted any rides yet.</p>
         <a href="offer-ride.html" class="btn btn-primary">Offer Your First Ride</a>
       </div>
@@ -223,7 +238,7 @@ function renderPostedRides(rides, container) {
 function renderRequestedRides(requestedList, container) {
   if (!requestedList || requestedList.length === 0) {
     container.innerHTML = `
-      <div style="text-align: center; padding: 50px; background: #ffffff; border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+      <div style="text-align: center; padding: 50px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
         <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 16px;">You haven't requested any rides yet.</p>
         <a href="find-ride.html" class="btn btn-primary">Find an Available Ride</a>
       </div>

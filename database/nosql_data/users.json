@@ -126,7 +126,7 @@
   {
     "_id": "6adccc7f7839a3f3caa059de",
     "createdAt": "2026-10-24T15:19:27.841Z",
-    "updatedAt": "2026-10-24T15:19:27.841Z",
+    "updatedAt": "2026-10-26T10:45:48.815Z",
     "name": "AmiBasayJabo",
     "studentId": "2254901093",
     "email": "amibasayjabo@bup.edu.bd",
@@ -137,7 +137,7 @@
     "role": "driver",
     "password": "$2b$10$D2oSAd8yeBi.T4nyZr8MzeNi6iCE91QjUXJAXONIw79.Goa48XeJS",
     "vehicleType": "Car",
-    "vehicleModel": "Suzuki Swift Dzire (Dhaka Metro Kha 14-5566)",
+    "vehicleModel": "BMW",
     "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=300&q=80",
     "rating": 4.92,
     "totalReviews": 36,
