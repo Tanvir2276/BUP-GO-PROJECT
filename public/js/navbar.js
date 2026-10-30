@@ -392,6 +392,7 @@ function renderNavbar() {
           <li><a href="find-ride.html" class="nav-link ${currentPath.includes('find-ride') ? 'active' : ''}">🔍 Find a Ride</a></li>
           <li><a href="offer-ride.html" class="nav-link ${currentPath.includes('offer-ride') ? 'active' : ''}">➕ Offer a Ride</a></li>
           <li><a href="my-rides.html" class="nav-link ${currentPath.includes('my-rides') ? 'active' : ''}">📅 My Rides</a></li>
+          <li><a href="notifications.html" class="nav-link ${currentPath.includes('notifications') ? 'active' : ''}">🔔 Notifications</a></li>
           ${user && user.role === 'admin' ? `<li><a href="admin.html" class="nav-link ${currentPath.includes('admin') ? 'active' : ''}">🛡️ Admin Panel</a></li>` : ''}
         </ul>
 
@@ -439,8 +440,8 @@ function renderNavbar() {
               </div>
 
               <div style="padding: 10px 14px; background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center; display: flex; justify-content: space-between; align-items: center;">
+                <a href="notifications.html" style="font-size: 0.8rem; font-weight: 800; color: #10b981;">View All Notifications ➔</a>
                 <a href="my-rides.html" style="font-size: 0.78rem; font-weight: 700; color: var(--bup-primary);">Manage My Rides →</a>
-                <a href="find-ride.html" style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted);">Browse Rides →</a>
               </div>
             </div>
           </div>
@@ -543,6 +544,10 @@ function renderNavbar() {
         <span class="mobile-nav-icon">📅</span>
         <span class="mobile-nav-label">My Rides</span>
       </a>
+      <a href="notifications.html" class="mobile-nav-item ${currentPath.includes('notifications') ? 'active' : ''}">
+        <span class="mobile-nav-icon">🔔</span>
+        <span class="mobile-nav-label">Alerts</span>
+      </a>
       <a href="${user ? 'profile.html' : 'login.html'}" class="mobile-nav-item ${currentPath.includes('profile') || currentPath.includes('login') ? 'active' : ''}">
         <span class="mobile-nav-icon">${user ? '👤' : '🔑'}</span>
         <span class="mobile-nav-label">${user ? 'Profile' : 'Login'}</span>
@@ -639,7 +644,7 @@ function renderFooter() {
   `;
 }
 
-// Daily Login Streak Loyalty System (Requirements: 1 pt -> 2 pts -> 4 pts... 2x doubling; reset on missed day)
+// Daily Login Streak Loyalty System (silent streak tracking, no popup toast)
 function initDailyLoginStreak() {
   const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
   if (!user) return;
@@ -657,20 +662,17 @@ function initDailyLoginStreak() {
     localStorage.setItem('bupgo_streak_days', streakDays.toString());
     localStorage.setItem('bupgo_last_streak_date', todayStr);
     localStorage.setItem('bupgo_user_points', currentPoints.toString());
-    renderStreakBanner(streakDays, ptsAwarded, false);
   } else if (lastDateStr !== todayStr) {
     const lastDate = new Date(lastDateStr);
     const currDate = new Date(todayStr);
     const diffDays = Math.round((currDate - lastDate) / (1000 * 3600 * 24));
 
-    let wasReset = false;
     if (diffDays === 1) {
       // Consecutive daily login! Streak doubles!
       streakDays += 1;
     } else if (diffDays > 1) {
       // Missed at least 1 day, streak breaks & resets to Day 1
       streakDays = 1;
-      wasReset = true;
     }
 
     const ptsAwarded = Math.pow(2, streakDays - 1);
@@ -678,7 +680,6 @@ function initDailyLoginStreak() {
     localStorage.setItem('bupgo_streak_days', streakDays.toString());
     localStorage.setItem('bupgo_last_streak_date', todayStr);
     localStorage.setItem('bupgo_user_points', currentPoints.toString());
-    renderStreakBanner(streakDays, ptsAwarded, wasReset);
   }
 }
 
@@ -690,47 +691,7 @@ function getStreakInfo() {
 }
 
 function renderStreakBanner(streakDays, pointsToday, wasReset) {
-  const toastId = 'bupgo-streak-toast';
-  const existing = document.getElementById(toastId);
-  if (existing) existing.remove();
-
-  const banner = document.createElement('div');
-  banner.id = toastId;
-  banner.style.cssText = `
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    border: 2px solid ${wasReset ? '#f59e0b' : '#10b981'};
-    color: #ffffff;
-    border-radius: 14px;
-    padding: 16px 20px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
-    z-index: 10000;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    max-width: 380px;
-    animation: slideUpFade 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  `;
-
-  banner.innerHTML = `
-    <div style="font-size: 2.2rem; line-height: 1;">${wasReset ? '⚡' : '🔥'}</div>
-    <div style="flex: 1;">
-      <div style="font-size: 0.95rem; font-weight: 800; color: ${wasReset ? '#fbbf24' : '#34d399'};">
-        ${wasReset ? 'Streak Reset: Day 1' : `Daily Streak: Day ${streakDays}!`}
-      </div>
-      <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 2px;">
-        Earned <strong>+${pointsToday} Points</strong> today! (2x doubling streak: Next login = +${pointsToday * 2} pts)
-      </div>
-    </div>
-    <button onclick="document.getElementById('${toastId}').remove()" style="background:none; border:none; color:#94a3b8; font-size:1.3rem; cursor:pointer;">&times;</button>
-  `;
-
-  document.body.appendChild(banner);
-  setTimeout(() => {
-    if (banner.parentNode) banner.remove();
-  }, 7000);
+  // Toast disabled as per user requirement (silent points & streak tracking)
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -439,9 +439,8 @@ app.post('/api/rides', authenticateToken, async (req, res) => {
       city: 'nationwide'
     });
 
-    const costPerSeat = estimatedCost && Number(estimatedCost) > 0
-      ? Number(estimatedCost)
-      : fareSnapshot.totalFare;
+    const userProvidedCost = estimatedCost && Number(estimatedCost) > 0 ? Number(estimatedCost) : fareSnapshot.totalFare;
+    const costPerSeat = Math.max(80, userProvidedCost);
 
     const seats = parseInt(availableSeats, 10);
     const newRide = await Rides.create({
@@ -547,7 +546,7 @@ app.post('/api/requests', authenticateToken, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Ride not found or expired.' });
     }
 
-    if (String(ride.driverId) === String(req.user.id)) {
+    if (String(ride.driverId) === String(req.user.id) || (ride.driverStudentId && String(ride.driverStudentId) === String(req.user.studentId))) {
       return res.status(400).json({ success: false, message: 'You cannot request to join your own ride post.' });
     }
 
@@ -575,7 +574,7 @@ app.post('/api/requests', authenticateToken, async (req, res) => {
 
     const rider = await Users.findById(req.user.id);
 
-    const costPerSeat = ride.estimatedCost || (ride.fareSnapshot && ride.fareSnapshot.totalFare) || 40;
+    const costPerSeat = Math.max(80, Number(ride.estimatedCost || (ride.fareSnapshot && ride.fareSnapshot.totalFare) || 80));
     const totalEstimatedPrice = costPerSeat * requestedSeats;
 
     const newRequest = await Requests.create({
@@ -864,9 +863,15 @@ app.put('/api/fares/configs', authenticateToken, async (req, res) => {
 app.get('/api/users/my-rides', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+    const userStudentId = req.user.studentId;
 
-    // 1. Rides posted by this user
-    const postedRides = await Rides.find({ driverId: userId });
+    // 1. Rides posted by this user (check both driverId and driverStudentId)
+    const postedRides = await Rides.find({
+      $or: [
+        { driverId: userId },
+        ...(userStudentId ? [{ driverStudentId: userStudentId }] : [])
+      ]
+    });
 
     // Attach incoming passenger requests to each posted ride
     const postedWithRequests = await Promise.all(
@@ -879,8 +884,13 @@ app.get('/api/users/my-rides', authenticateToken, async (req, res) => {
       })
     );
 
-    // 2. Rides requested by this user
-    const myRequests = await Requests.find({ riderId: userId });
+    // 2. Rides requested by this user (check riderId and riderStudentId)
+    const myRequests = await Requests.find({
+      $or: [
+        { riderId: userId },
+        ...(userStudentId ? [{ riderStudentId: userStudentId }] : [])
+      ]
+    });
     const requestedWithRideInfo = await Promise.all(
       myRequests.map(async reqDoc => {
         const ride = await Rides.findById(reqDoc.rideId);

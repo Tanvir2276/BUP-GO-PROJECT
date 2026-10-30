@@ -15,13 +15,13 @@ function setOfferDirection(dir) {
 
     if (container) {
       container.innerHTML = `
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Mirpur 10 Circle', '${CAMPUS_NAME}', 40)">Mirpur 10 ➔ BUP (৳40)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Uttara Sector 7 (House Building)', '${CAMPUS_NAME}', 70)">Uttara ➔ BUP (৳70)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Dhanmondi 27 (Rapa Plaza)', '${CAMPUS_NAME}', 80)">Dhanmondi ➔ BUP (৳80)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Savar Cantonment (Sena Auditorium)', '${CAMPUS_NAME}', 90)">Savar ➔ BUP (৳90)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Farmgate Metro Station', '${CAMPUS_NAME}', 50)">Farmgate ➔ BUP (৳50)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Mohakhali Bus Terminal', '${CAMPUS_NAME}', 60)">Mohakhali ➔ BUP (৳60)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('ECB Chattar (Matikata)', '${CAMPUS_NAME}', 30)">ECB Chattar ➔ BUP (৳30)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Mirpur 10 Circle', '${CAMPUS_NAME}', 80)">Mirpur 10 ➔ BUP (৳80)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Uttara Sector 7 (House Building)', '${CAMPUS_NAME}', 110)">Uttara ➔ BUP (৳110)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Dhanmondi 27 (Rapa Plaza)', '${CAMPUS_NAME}', 130)">Dhanmondi ➔ BUP (৳130)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Savar Cantonment (Sena Auditorium)', '${CAMPUS_NAME}', 150)">Savar ➔ BUP (৳150)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Farmgate Metro Station', '${CAMPUS_NAME}', 95)">Farmgate ➔ BUP (৳95)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('Mohakhali Bus Terminal', '${CAMPUS_NAME}', 100)">Mohakhali ➔ BUP (৳100)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('ECB Chattar (Matikata)', '${CAMPUS_NAME}', 80)">ECB Chattar ➔ BUP (৳80)</button>
       `;
     }
   } else {
@@ -30,13 +30,13 @@ function setOfferDirection(dir) {
 
     if (container) {
       container.innerHTML = `
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Mirpur 10 Circle', 40)">BUP ➔ Mirpur 10 (৳40)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Uttara Sector 7 (House Building)', 70)">BUP ➔ Uttara (৳70)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Dhanmondi 27 (Rapa Plaza)', 80)">BUP ➔ Dhanmondi (৳80)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Savar Bazar Bus Stand', 90)">BUP ➔ Savar (৳90)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Banani Kakoli Mor', 60)">BUP ➔ Banani (৳60)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Farmgate Metro Station', 50)">BUP ➔ Farmgate (৳50)</button>
-        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Gazipur Chourasta', 95)">BUP ➔ Gazipur (৳95)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Mirpur 10 Circle', 80)">BUP ➔ Mirpur 10 (৳80)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Uttara Sector 7 (House Building)', 110)">BUP ➔ Uttara (৳110)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Dhanmondi 27 (Rapa Plaza)', 130)">BUP ➔ Dhanmondi (৳130)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Savar Bazar Bus Stand', 150)">BUP ➔ Savar (৳150)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Banani Kakoli Mor', 105)">BUP ➔ Banani (৳105)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Farmgate Metro Station', 95)">BUP ➔ Farmgate (৳95)</button>
+        <button type="button" class="hotspot-chip" onclick="applyRouteTemplate('${CAMPUS_NAME}', 'Gazipur Chourasta', 160)">BUP ➔ Gazipur (৳160)</button>
       `;
     }
   }

@@ -163,7 +163,10 @@ async function loadRides() {
       const seatsLeft = ride.availableSeats;
       const isFull = seatsLeft <= 0;
       const currentUser = Auth.getUser();
-      const isOwnRide = currentUser && String(currentUser.id) === String(ride.driverId);
+      const isOwnRide = currentUser && (
+        String(currentUser.id) === String(ride.driverId) ||
+        (currentUser.studentId && String(currentUser.studentId) === String(ride.driverStudentId))
+      );
       const rating = Number(ride.driverRating !== undefined ? ride.driverRating : 4.9);
 
       const vehEmoji = ride.transportationType === 'Bike' ? '🏍️' : ride.transportationType === 'CNG' ? '🛺' : '🚗';

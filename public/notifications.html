@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications & Alerts - BUPGO Ride Sharing</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/navbar.css">
+  <style>
+    .notif-page-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      transition: var(--transition);
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      position: relative;
+    }
+    .notif-page-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .notif-page-card.unread {
+      background: rgba(16, 185, 129, 0.06);
+      border-left: 5px solid #10b981;
+    }
+    body.dark-mode .notif-page-card.unread {
+      background: rgba(16, 185, 129, 0.12);
+      border-left: 5px solid #34d399;
+    }
+    .notif-page-card.read {
+      opacity: 0.85;
+      border-left: 5px solid #94a3b8;
+    }
+    .notif-icon-bubble {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--bup-primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .notif-filter-btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+    .notif-filter-btn.active, .notif-filter-btn:hover {
+      background: var(--bup-primary);
+      color: #ffffff;
+      border-color: var(--bup-primary);
+    }
+  </style>
+</head>
+<body>
+  <!-- Universal Navbar Mount -->
+  <div id="navbar-mount"></div>
+
+  <!-- Page Header -->
+  <div class="page-header-band">
+    <div class="container">
+      <h1 class="page-header-title">🔔 All Notifications & Alerts</h1>
+      <p class="page-header-sub">Track passenger join requests, ride booking confirmations, campus announcements, and driver status updates.</p>
+    </div>
+  </div>
+
+  <div class="container" style="margin-bottom: 70px;">
+    <!-- Top Action Controls -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: var(--shadow-sm);">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="notif-filter-btn active" id="filter-all" onclick="filterNotifs('all')">All Notifications (<span id="count-all">0</span>)</button>
+        <button type="button" class="notif-filter-btn" id="filter-unread" onclick="filterNotifs('unread')">Unread (<span id="count-unread">0</span>)</button>
+        <button type="button" class="notif-filter-btn" id="filter-requests" onclick="filterNotifs('seat_request')">Ride Requests</button>
+        <button type="button" class="notif-filter-btn" id="filter-system" onclick="filterNotifs('system')">System & Alerts</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="markAllNotificationsAsRead()" style="font-weight: 700;">
+          ✓ Mark All as Read
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="loadNotificationsPage()" style="font-weight: 700;">
+          🔄 Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Notification Alert Items List -->
+    <div id="notif-page-list">
+      <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+        <div style="font-size: 2.2rem; margin-bottom: 10px;">🔔</div>
+        <p style="font-size: 1.05rem;">Loading your notifications...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Universal Footer Mount -->
+  <div id="footer-mount"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/navbar.js"></script>
+  <script>
+    let allNotifications = [];
+    let currentFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadNotificationsPage();
+    });
+
+    async function loadNotificationsPage() {
+      const container = document.getElementById('notif-page-list');
+      try {
+        const res = await apiRequest('/notifications');
+        allNotifications = res.notifications || [];
+
+        const unreadCount = allNotifications.filter(n => !n.isRead).length;
+        document.getElementById('count-all').textContent = allNotifications.length;
+        document.getElementById('count-unread').textContent = unreadCount;
+
+        renderNotificationsList();
+      } catch (err) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: var(--bup-red); background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+            <p>Failed to load notifications: ${err.message}</p>
+            <button class="btn btn-secondary btn-sm" onclick="loadNotificationsPage()" style="margin-top: 10px;">Retry</button>
+          </div>
+        `;
+      }
+    }
+
+    function filterNotifs(type) {
+      currentFilter = type;
+      document.querySelectorAll('.notif-filter-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`filter-${type}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      renderNotificationsList();
+    }
+
+    function renderNotificationsList() {
+      const container = document.getElementById('notif-page-list');
+      let filtered = allNotifications;
+
+      if (currentFilter === 'unread') {
+        filtered = allNotifications.filter(n => !n.isRead);
+      } else if (currentFilter === 'seat_request') {
+        filtered = allNotifications.filter(n => n.type === 'seat_request' || n.type === 'request_update');
+      } else if (currentFilter === 'system') {
+        filtered = allNotifications.filter(n => n.type !== 'seat_request' && n.type !== 'request_update');
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 60px 20px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color);">
+            <div style="font-size: 2.5rem; margin-bottom: 10px;">📭</div>
+            <h3 style="font-size: 1.15rem; color: var(--text-main); font-weight: 700;">No Notifications Found</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">You have no ${currentFilter === 'unread' ? 'unread ' : ''}notifications at this moment.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(notif => {
+        const isUnread = !notif.isRead;
+        const icon = notif.type === 'seat_request' ? '🎫' : notif.type === 'request_update' ? '✅' : '📢';
+        const formattedDate = notif.createdAt ? new Date(notif.createdAt).toLocaleString('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }) : 'Just now';
+
+        return `
+          <div class="notif-page-card ${isUnread ? 'unread' : 'read'}" id="notif-card-${notif._id}">
+            <div class="notif-icon-bubble">${icon}</div>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 4px;">
+                <div>
+                  <strong style="font-size: 1.05rem; color: var(--text-main); font-weight: 800;">${notif.title || 'Campus Notification'}</strong>
+                  ${isUnread ? `<span class="badge badge-green" style="margin-left: 8px; font-size: 0.7rem; font-weight: 700;">NEW</span>` : ''}
+                </div>
+                <span style="font-size: 0.78rem; color: var(--text-muted); white-space: nowrap;">${formattedDate}</span>
+              </div>
+              <p style="font-size: 0.92rem; color: var(--text-main); line-height: 1.5; margin-bottom: 10px;">
+                ${notif.message}
+              </p>
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                ${isUnread ? `
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="markSingleAsRead('${notif._id}')" style="font-size: 0.78rem; padding: 4px 10px;">
+                    Mark as Read
+                  </button>
+                ` : `
+                  <span style="font-size: 0.78rem; color: var(--text-muted);">✓ Read</span>
+                `}
+                <a href="my-rides.html" class="btn btn-primary btn-sm" style="font-size: 0.78rem; padding: 4px 12px; font-weight: 700;">
+                  Go to My Rides ➔
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function markSingleAsRead(id) {
+      try {
+        await apiRequest(`/notifications/${id}/read`, { method: 'PUT' });
+        const target = allNotifications.find(n => n._id === id);
+        if (target) target.isRead = true;
+        
+        const unreadCount = allNotifications.filter(n => !n.isRead).length;
+        document.getElementById('count-unread').textContent = unreadCount;
+        renderNotificationsList();
+        if (typeof updateUnreadBadge === 'function') updateUnreadBadge();
+      } catch (err) {
+        showToast(err.message || 'Error updating notification', 'error');
+      }
+    }
+  </script>
+</body>
+</html>
